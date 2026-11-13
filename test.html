@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<meta name="theme-color" content="#2772CC">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cimiento">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Cimiento: registro de pruebas (protocolo v2)</title>
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/tokens.css">
+<style>
+ @font-face{font-family:"Overpass Cimiento";src:url("assets/fonts/overpass-latin-variable.woff2") format("woff2");font-weight:100 900}
+ *{box-sizing:border-box}
+ html{-webkit-text-size-adjust:100%;touch-action:manipulation}
+ body{margin:0;background:#F5F8FC;color:#2C3A41;font:400 16px/1.5 "Overpass Cimiento",Overpass,Arial,sans-serif;padding-bottom:env(safe-area-inset-bottom,0px)}
+ .ancho{max-width:980px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px 16px;display:flex;flex-direction:column;gap:16px}
+ h1{font:800 24px/1.25 inherit;margin:0} h2{font:800 18px/1.3 inherit;margin:0 0 8px} h3{font:800 16px/1.3 inherit;margin:0}
+ .tarjeta{background:#fff;border:1px solid #DFE7F1;border-radius:16px;padding:16px}
+ .apoyo{font-size:14px;color:#546E7A;margin:4px 0}
+ .fila-h{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-top:8px}
+ .fila-h>div{display:flex;flex-direction:column;gap:4px;flex:1;min-width:130px}
+ label{font-weight:700;font-size:14px}
+ input,select,textarea{min-height:44px;padding:8px 12px;border:1px solid #708590;border-radius:6px;font:inherit;font-size:16px;background:#fff;width:100%}
+ input[type=checkbox]{width:auto;min-height:0}
+ button{min-height:44px;padding:0 18px;border-radius:48px;border:2px solid #28892B;background:#fff;color:#28652B;font:800 14.5px/1 inherit;cursor:pointer}
+ button.primario{background:#28652B;border-color:#28652B;color:#fff}
+ button.peligro{border-color:#C4000F;color:#C4000F}
+ a.boton{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:48px;background:#1D5699;color:#fff;font-weight:800;text-decoration:none;font-size:14.5px}
+ :focus-visible{outline:3px solid #2772CC;outline-offset:2px}
+ .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+ .tarea{border:1px solid #DFE7F1;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:#fff}
+ .escenario{background:#EAF1FA;padding:10px 12px;border-radius:10px;font-weight:700;margin:0}
+ .cron{font:800 32px/1 inherit;margin:0;font-variant-numeric:tabular-nums}
+ .acciones{display:flex;gap:8px;flex-wrap:wrap}
+ .tarjeta-part{border:2px dashed #C9A800;background:#FFF9CC;border-radius:12px;padding:12px}
+ .tarjeta-part dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:8px 0 0} .tarjeta-part dt{font-weight:700} .tarjeta-part dd{margin:0}
+ table{border-collapse:collapse;width:100%;font-size:14px} th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #E7ECF0;vertical-align:top}
+ .tabla-wrap{overflow-x:auto} .tabla-wrap td,.tabla-wrap th{white-space:nowrap}
+ .cumple{color:#28652B;font-weight:800}.nocumple{color:#C4000F;font-weight:800}
+ .sus-item{display:grid;grid-template-columns:1fr 90px;gap:12px;align-items:center;border-bottom:1px solid #E7ECF0;padding:6px 0}
+ code{background:#EEF3FA;padding:1px 6px;border-radius:4px;font-size:13px;word-break:break-all}
+ .aviso{padding:10px 12px;border-radius:10px;background:#FFF9CC;border:1px solid #F2DD5C;font-weight:700;margin:0}
+ .aviso.azul{background:#EAF1FA;border-color:#C9D8EC}
+ .qr-fila{display:grid;grid-template-columns:1fr;gap:8px;border-top:1px solid #E7ECF0;padding:12px 0}
+ .qr-par{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
+ .qr{width:132px;height:132px;background:#fff;border:1px solid #DFE7F1;border-radius:8px;display:grid;place-items:center;overflow:hidden}
+ .qr svg{width:124px;height:124px}
+ .problema{display:grid;grid-template-columns:1fr 120px;gap:8px}
+ #cif{background:#fff;border:1px solid #DFE7F1;border-radius:16px;padding:20px}
+ #cif h2{margin-top:12px} #cif table{font-size:13px} #cif td,#cif th{white-space:normal}
+ @media print{
+  body{background:#fff} .ancho{max-width:none;padding:0}
+  body.imprime-qr .ancho>*:not(#sec-qr){display:none!important}
+  body.imprime-qr #sec-qr>*:not(#qr-lista){display:none!important}
+  body.imprime-qr .qr-fila{break-after:page;border:0} body.imprime-qr .qr-fila button{display:none}
+  body.imprime-qr .qr{width:220px;height:220px} body.imprime-qr .qr svg{width:210px;height:210px}
+  body.imprime-cif .ancho>*:not(#sec-cif){display:none!important}
+  body.imprime-cif #sec-cif>*:not(#cif){display:none!important}
+  body.imprime-cif #cif{border:0;padding:0} body.imprime-cif #cif textarea{border:0;padding:0}
+  button{display:none}
+ }
+</style>
+</head>
+<body>
+<div class="ancho">
+  <header>
+    <h1>Registro de pruebas de usabilidad · protocolo v2</h1>
+    <p class="apoyo">Herramienta de la persona que modera. Guarda en este navegador. Marco: ISO 9241-11 (efectividad, eficiencia, satisfacción) y resumen CIF según ISO/IEC 25062. Prototipo académico; n pequeño: resultados exploratorios.</p>
+    <p id="aviso-guardar" class="aviso" role="alert" hidden>Este navegador no permite guardar (modo privado o almacenamiento bloqueado). Lo que anote se perderá al cerrar: descargue el respaldo antes de salir.</p>
+  </header>
+
+  <section class="tarjeta" aria-labelledby="t-part">
+    <h2 id="t-part">Participante</h2>
+    <div class="fila-h">
+      <div><label for="sel-p">Participante</label><select id="sel-p"></select></div>
+      <button id="btn-nuevo" type="button">Agregar participante</button>
+      <button id="btn-borrar" class="peligro" type="button">Borrar este participante</button>
+    </div>
+    <div class="fila-h">
+      <div><label for="edad">Edad</label><input id="edad" type="number" inputmode="numeric" min="14" max="99"></div>
+      <div><label for="genero">Género</label><input id="genero" type="text" maxlength="20"></div>
+      <div><label for="exp">Experiencia con apps bancarias</label><select id="exp"><option value="">—</option><option>Baja</option><option>Media</option><option>Alta</option></select></div>
+      <div><label for="disp">Dispositivo</label><select id="disp"><option value="">—</option><option>iPhone</option><option>Android</option><option>Otro</option></select></div>
+      <div><label for="so">Modelo y sistema</label><input id="so" type="text" placeholder="iPhone 13, iOS 18…" maxlength="40"></div>
+    </div>
+    <p><label><input id="consent" type="checkbox"> Leyó y aceptó el consentimiento informado (grabación, confidencialidad y derecho a retirarse).</label></p>
+    <div class="tarjeta-part">
+      <h3>Tarjeta del participante (datos de demostración)</h3>
+      <dl><dt>RUT</dt><dd>11.111.111-1</dd><dt>Clave</dt><dd>demo1234</dd><dt>Ingreso mensual</dt><dd>$1.700.000</dd><dt>Gastos fijos</dt><dd>$1.100.000</dd></dl>
+      <p class="apoyo">Recuérdele: es una demostración; no debe usar su clave real.</p>
+    </div>
+    <p class="apoyo">Códigos de este participante: <strong id="codigo-sug"></strong>. La app abre como Tomás. <code>&amp;tour=0</code> omite el recorrido guiado (salvo que quiera medirlo dentro de T1).</p>
+    <p id="version-app" class="apoyo"></p>
+  </section>
+
+  <section class="tarjeta" aria-labelledby="t-tareas">
+    <h2 id="t-tareas">Tareas</h2>
+    <p class="apoyo">Lea el escenario sin nombrar menús ni botones. Inicie el cronómetro al terminar de leer y deténgalo cuando la persona declare que terminó o se rinda. Éxito: 1 = lo logra sola; 0,5 = con una pista; 0 = no lo logra. Metas a priori: éxito ≥ 80 %, SEQ ≥ 5,5, SUS &gt; 68.</p>
+    <div id="tareas" class="grid2"></div>
+  </section>
+
+  <section class="tarjeta" aria-labelledby="t-sus">
+    <h2 id="t-sus">SUS (al terminar la sesión)</h2>
+    <p class="apoyo">1 = muy en desacuerdo, 5 = muy de acuerdo. Referencia: 68 (Brooke, 1996).</p>
+    <div id="sus"></div>
+    <p>SUS de este participante: <strong id="sus-valor">—</strong></p>
+    <label for="diez">¿En 10 segundos entendió de qué trata y cuánto falta? (sí/no)</label>
+    <select id="diez"><option value="">—</option><option value="si">Sí</option><option value="no">No</option></select>
+    <label for="notas">Observaciones y problemas vistos</label>
+    <textarea id="notas" rows="3"></textarea>
+  </section>
+
+  <section class="tarjeta" aria-labelledby="t-hall">
+    <h2 id="t-hall">Hallazgos de este participante</h2>
+    <p class="apoyo">Hasta 3 problemas con su severidad (Nielsen: 1 cosmético, 2 menor, 3 mayor, 4 catastrófico) y una frase textual.</p>
+    <div id="problemas"></div>
+    <label for="frase">Frase textual</label>
+    <input id="frase" type="text" maxlength="200" placeholder="«…»">
+  </section>
+
+  <section id="sec-qr" class="tarjeta" aria-labelledby="t-qr">
+    <h2 id="t-qr">Enlaces y QR</h2>
+    <div class="fila-h"><div><label for="base-url">Dirección pública de la app</label><input id="base-url" type="url" inputmode="url" autocomplete="off" placeholder="https://…/"></div>
+      <button id="btn-imprimir-qr" type="button">Imprimir hoja de QR</button></div>
+    <p class="apoyo">Se completa sola con la dirección del sitio donde abrió este registro; cámbiela solo si la app está en otro sitio. T1 abre el alta limpia (<code>alta-pN</code>); T2 a T4 abren el caso de ejemplo (<code>demo-pN</code>). El QR se genera en este navegador, sin servicios externos.</p>
+    <div id="qr-lista"></div>
+  </section>
+
+  <section class="tarjeta" aria-labelledby="t-imp">
+    <h2 id="t-imp">Registro de la app (eventos)</h2>
+    <p class="apoyo">Si el participante usó su propio teléfono: en la app, Mi cuenta › Acerca de este prototipo › «Copiar registro» o «Compartir registro», y péguelo o elíjalo aquí. Se combinan sin duplicados y se asocian por código (<code>alta-pN</code> / <code>demo-pN</code>). Sin nombres, RUT, claves ni montos.</p>
+    <label for="imp-texto">Pegar registro (JSON)</label>
+    <textarea id="imp-texto" rows="3" placeholder='{"app":"Cimiento","eventos":[…]}'></textarea>
+    <div class="acciones" style="margin-top:8px"><button id="btn-importar" class="primario" type="button">Importar registro de un participante</button><label class="boton" style="display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:2px solid #28892B;border-radius:48px;color:#28652B;font-weight:800;cursor:pointer">Elegir archivo<input id="imp-archivo" type="file" accept="application/json,.json" style="position:absolute;opacity:0;width:1px;height:1px"></label></div>
+    <p id="imp-msg" class="apoyo" role="status"></p>
+  </section>
+
+  <section class="tarjeta" aria-labelledby="t-res">
+    <h2 id="t-res">Resultados (todos los participantes)</h2>
+    <p id="n-part" class="apoyo"></p>
+    <div class="tabla-wrap"><table id="tabla-res"></table></div>
+    <p>SUS promedio: <strong id="sus-prom">—</strong> (meta &gt; 68) · Con consentimiento: <strong id="n-cons">0</strong></p>
+    <h3 style="margin-top:12px">Hallazgos consolidados</h3>
+    <div class="tabla-wrap"><table id="tabla-hall"></table></div>
+    <div class="acciones" style="margin-top:12px">
+      <button id="btn-csv" class="primario" type="button">Descargar CSV</button>
+      <button id="btn-copiar" type="button">Copiar resumen</button>
+      <button id="btn-cif" type="button">Generar resumen CIF</button>
+      <button id="btn-eventos" type="button">Descargar registro de la app (JSON)</button>
+    </div>
+    <h3 style="margin-top:16px">Respaldo</h3>
+    <div class="acciones">
+      <button id="btn-respaldo" type="button">Descargar respaldo completo (JSON)</button>
+      <label style="display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:2px solid #28892B;border-radius:48px;color:#28652B;font-weight:800;cursor:pointer">Restaurar respaldo<input id="res-archivo" type="file" accept="application/json,.json" style="position:absolute;opacity:0;width:1px;height:1px"></label>
+      <button id="btn-reset" class="peligro" type="button">Borrar todo</button>
+    </div>
+    <p class="apoyo">«Borrar todo» elimina participantes, tareas, hallazgos y registros importados de este navegador y no se puede deshacer. Descargue el respaldo antes.</p>
+    <p id="msg" class="apoyo" role="status"></p>
+  </section>
+
+  <section id="sec-cif" aria-label="Resumen CIF" hidden>
+    <div id="cif"></div>
+    <div class="acciones" style="margin-top:12px"><button id="btn-cif-imprimir" class="primario" type="button">Imprimir resumen</button><button id="btn-cif-copiar" type="button">Copiar como texto</button><button id="btn-cif-cerrar" type="button">Cerrar</button></div>
+  </section>
+</div>
+
+<script src="js/protocolo.js"></script>
+<script src="assets/vendor/qrcode.js"></script>
+<script>
+(function () {
+  "use strict";
+  var KEY = "cimiento:test:v2", PR = window.CimientoProtocolo, META = PR.METAS;
+  var TAREAS = [
+    { id: "T1", nombre: "Empezar", metaS: 180, prep: "t1",
+      esc: "Acabas de instalar la app y vas a empezar. Ponla en marcha con los datos de esta tarjeta. Cuando termines, dime cuál es tu primera meta pequeña y en cuánto tiempo la logras.",
+      fin: "Ingresa con la tarjeta, completa el alta (5 pasos, con la autorización y eligiendo cómo ahorra) y dice su meta pequeña: la casita en curso y su plazo, tal como lo muestra «Su primer viaje»." },
+    { id: "T2", nombre: "Poner dinero", metaS: 60, prep: "demo",
+      esc: "Hoy decides poner $500.000 de tu cuenta del banco en este ahorro. Hazlo en la app. Cuando termines, dime cuánto te falta ahora para completar tu meta pequeña actual.",
+      fin: "Aporte de $500.000 verificado (ve el comprobante) y dice lo que falta para la casita en curso (demo: $4.520.000 para la casita 6)." },
+    { id: "T3", nombre: "Cuando cambian las cosas", metaS: 90, prep: "t3",
+      esc: "Pasó un mes. Para avanzar el mes en esta prueba: abre Mi cuenta, baja hasta «Acerca de este prototipo» y toca «Simular fin de mes». Ese paso existe solo para la prueba; en la app real el mes pasa solo. Después, mira qué te dice la app y decide qué hacer.",
+      fin: "Abre el aviso amarillo de Ruta, entiende la propuesta y decide Aplicar o Ahora no explicando por qué. Si ahorró menos (demo Tomás): «No pasa nada: ajustamos el camino…», $450.000 al mes y el plazo que muestre la app. Si ahorró más (demo Paula): «Ahorraron más de lo previsto: ¿quieren llegar antes?». El paso de simular el mes no se evalúa: iniciar el cronómetro cuando la persona termina de simularlo." },
+    { id: "T4", nombre: "Lo que te da el banco", metaS: 60, prep: "demo",
+      esc: "Quieres saber qué te da el banco cuando llegues a la mitad de lo que necesitas juntar. Averígualo en la app. Después elige una de las metas que ya completaste y cuéntame qué es y qué podrías hacer con ella.",
+      fin: "Dice el premio de la mitad del pie (tasa hipotecaria preferente y ejecutivo dedicado) y abre la ficha de una casita lograda: activo verificado por Bci; podría rescatarla o, si ahorra con alguien, transferirla (simulado)." }
+  ];
+  var TOQUES = ["Ruta", "Aportes", "Premios", "Juntos", "Mi cuenta", "Aportar", "Menú", "Otro"];
+  var SUS = ["Creo que me gustaría usar Cimiento con frecuencia.", "Encontré Cimiento innecesariamente complejo.", "Pensé que Cimiento era fácil de usar.", "Creo que necesitaría ayuda de alguien con conocimientos técnicos para usar Cimiento.", "Encontré que las distintas funciones de Cimiento estaban bien integradas.", "Pensé que había demasiada inconsistencia en Cimiento.", "Imagino que la mayoría de las personas aprendería a usar Cimiento muy rápido.", "Encontré Cimiento muy incómodo de usar.", "Me sentí muy seguro/a usando Cimiento.", "Necesité aprender muchas cosas antes de poder usar Cimiento."];
+  var $ = function (id) { return document.getElementById(id); };
+  var puedeGuardar = (function () { try { localStorage.setItem("cimiento:test:prueba", "1"); localStorage.removeItem("cimiento:test:prueba"); return true; } catch (e) { return false; } })();
+  $("aviso-guardar").hidden = puedeGuardar;
+  var data = migrar(cargar()), actual = data.p.length ? 0 : -1, corriendo = null;
+  function cargar() { try { var d = JSON.parse(localStorage.getItem(KEY)); if (d && d.p) return d; } catch (e) {} return { p: [] }; }
+  // Datos guardados de versiones anteriores: se agregan los campos nuevos con valores por defecto.
+  function migrar(d) {
+    d.eventos = d.eventos || []; d.base = d.base || ""; d.mejoras = d.mejoras || "";
+    d.p.forEach(function (p) { p.disp = p.disp || ""; p.problemas = p.problemas || []; p.frase = p.frase || ""; p.t = p.t || {}; p.sus = p.sus || []; Object.keys(p.t).forEach(function (k) { var r = p.t[k]; if (r.crit === undefined) r.crit = null; if (r.toque && TOQUES.indexOf(r.toque) < 0) r.toque = "Otro"; }); });
+    return d;
+  }
+  function guardar() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { $("aviso-guardar").hidden = false; } }
+  function msg(t) { $("msg").textContent = t; }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function num(p) { return p.id.slice(1); }
+  function f1(n) { return n == null ? "—" : (Math.round(n * 10) / 10).toString().replace(".", ","); }
+  function base() { var b = ($("base-url").value || data.base || "").trim(); if (!b) b = location.origin + location.pathname.replace(/[^/]*$/, ""); return b.replace(/[^/]*\.html$/, "").replace(/\/?$/, "/"); }
+  function enlaceT1(n) { return base() + "index.html?codigo=alta-p" + n + "&persona=p1&tour=0"; }
+  function enlaceDemo(n, finmes) { return base() + "index.html?codigo=demo-p" + n + "&persona=p1&tour=0" + (finmes ? "&finmes=1" : ""); }
+  function eventosApp() { try { return PR.eventosDe(localStorage.getItem("cimiento:eventos") || "[]") || []; } catch (e) { return []; } }
+  function todosEventos() { return PR.combinarEventos(eventosApp(), data.eventos).lista; }
+  function eventosDe(n) { return todosEventos().filter(function (e) { return PR.participanteDeCodigo(e.codigo) === "P" + n; }); }
+  function aToque(tipo) {
+    var id = String(tipo || "").replace(/^toque:/, "");
+    return { "tab-ruta": "Ruta", "tab-aportes": "Aportes", "tab-premios": "Premios", "tab-juntos": "Juntos", "tab-cuenta": "Mi cuenta", "btn-mas": "Aportar", "btn-menu": "Menú" }[id] || "Otro";
+  }
+  // Prepara la app en este navegador (mismo origen): T1 alta limpia; T3 reinicia el demo y simula fin de mes.
+  function preparar(t, p) {
+    var n = num(p);
+    Object.keys(localStorage).forEach(function (k) {
+      if (t.prep === "t1" && (k === "cimiento:sesion" || k === "cimiento:alta" || k === "cimiento:pareja:alta-p" + n || k === "cimiento:cache:alta-p" + n)) localStorage.removeItem(k);
+      if (t.prep === "t3" && (k === "cimiento:pareja:demo-p" + n || k === "cimiento:cache:demo-p" + n || k.indexOf("cimiento:pref:prop:") === 0)) localStorage.removeItem(k);
+    });
+    try { sessionStorage.clear(); } catch (e) {}
+  }
+  function enlaceTarea(t, p) { var n = num(p); return t.prep === "t1" ? enlaceT1(n) : enlaceDemo(n, false); }
+  function nuevoP() { return { id: "P" + (data.p.length + 1), edad: "", genero: "", exp: "", disp: "", so: "", consent: false, notas: "", diez: "", t: {}, sus: [], problemas: [], frase: "" }; }
+
+  function renderSel() { $("sel-p").innerHTML = data.p.map(function (p, i) { return '<option value="' + i + '"' + (i === actual ? " selected" : "") + ">" + p.id + "</option>"; }).join("") || "<option>(sin participantes)</option>"; }
+  function renderFicha() {
+    var p = data.p[actual], dis = !p;
+    ["edad", "genero", "exp", "disp", "so", "consent", "notas", "diez", "frase"].forEach(function (k) { $(k).disabled = dis; });
+    if (!p) { $("codigo-sug").textContent = "—"; $("tareas").innerHTML = ""; $("sus").innerHTML = ""; $("problemas").innerHTML = ""; $("version-app").textContent = ""; return; }
+    ["edad", "genero", "exp", "disp", "so", "notas", "diez", "frase"].forEach(function (k) { $(k).value = p[k] || ""; }); $("consent").checked = p.consent;
+    $("codigo-sug").textContent = "alta-p" + num(p) + " (T1) y demo-p" + num(p) + " (T2 a T4)";
+    var vs = versiones(num(p)), todas = versionesGlobales();
+    $("version-app").textContent = vs.length ? "Versión de la app en su registro: " + vs.join(", ") + (todas.length > 1 ? ". Atención: hay participantes con versiones distintas (" + todas.join(", ") + ")." : ".") : "Aún sin eventos de la app para este participante.";
+    $("tareas").innerHTML = TAREAS.map(function (t) {
+      var r = p.t[t.id] || {};
+      function sel(k, ops) { return '<select data-k="' + k + '" aria-label="' + k + '"><option value="">—</option>' + ops.map(function (o) { return '<option value="' + o[0] + '"' + (String(r[k]) === String(o[0]) ? " selected" : "") + ">" + o[1] + "</option>"; }).join("") + "</select>"; }
+      function numIn(k, et) { return "<div><label>" + et + '</label><input type="number" inputmode="numeric" min="0" data-k="' + k + '" value="' + (r[k] == null ? "" : r[k]) + '"></div>'; }
+      return '<div class="tarea" data-t="' + t.id + '"><h3>' + t.id + " · " + esc(t.nombre) + " (máx. " + t.metaS + " s)</h3>" +
+        '<p class="escenario">«' + esc(t.esc) + '»</p><p class="apoyo">Estado final esperado: ' + esc(t.fin) + "</p>" +
+        '<div class="acciones"><a class="boton" data-abrir="' + t.id + '" href="' + esc(enlaceTarea(t, p)) + '" target="_blank" rel="noopener">Preparar y abrir la app</a></div>' +
+        '<p class="cron" data-cron>' + (r.s != null ? f1(r.s) + " s" : "0,0 s") + "</p>" +
+        '<div class="acciones"><button class="primario" data-a="ini" type="button">Iniciar</button><button data-a="fin" type="button">Detener</button></div>' +
+        '<div class="fila-h"><div><label>Éxito</label>' + sel("ok", [["1", "1 · sola"], ["0.5", "0,5 · con pista"], ["0", "0 · no lo logra"]]) + "</div>" +
+        "<div><label>¿Pista?</label>" + sel("pista", [["si", "Sí"], ["no", "No"]]) + "</div>" +
+        "<div><label>SEQ (1 a 7)</label>" + sel("seq", [1, 2, 3, 4, 5, 6, 7].map(function (n) { return [n, n]; })) + "</div></div>" +
+        '<div class="fila-h">' + numIn("desl", "Deslices") + numIn("equiv", "Equivocaciones") + numIn("crit", "Errores críticos") + "</div>" +
+        "<div><label>Primer toque</label>" + sel("toque", TOQUES.map(function (x) { return [x, x]; })) + "</div>" +
+        '<div><label>Nota</label><input type="text" data-k="obs" maxlength="200" value="' + esc(r.obs || "") + '"></div></div>';
+    }).join("");
+    $("sus").innerHTML = SUS.map(function (txt, i) {
+      var v = p.sus[i] || "";
+      return '<div class="sus-item"><span>' + (i + 1) + ". " + esc(txt) + '</span><select data-s="' + i + '" aria-label="Ítem ' + (i + 1) + '"><option value="">—</option>' + [1, 2, 3, 4, 5].map(function (n) { return '<option value="' + n + '"' + (v === n ? " selected" : "") + ">" + n + "</option>"; }).join("") + "</select></div>";
+    }).join("");
+    var sp = PR.sus(p.sus); $("sus-valor").textContent = sp == null ? "—" : f1(sp);
+    $("problemas").innerHTML = [0, 1, 2].map(function (i) {
+      var h = p.problemas[i] || {};
+      return '<div class="problema" data-h="' + i + '"><div><label>Problema ' + (i + 1) + '</label><input type="text" maxlength="160" data-hk="txt" value="' + esc(h.txt || "") + '"></div>' +
+        '<div><label>Severidad</label><select data-hk="sev"><option value="">—</option>' + [1, 2, 3, 4].map(function (n) { return '<option value="' + n + '"' + (h.sev === n ? " selected" : "") + ">" + n + "</option>"; }).join("") + "</select></div></div>";
+    }).join("");
+  }
+  function versiones(n) { var s = {}; eventosDe(n).forEach(function (e) { if (e.v) s[e.v] = 1; }); return Object.keys(s).sort(); }
+  function versionesGlobales() { var s = {}; todosEventos().forEach(function (e) { if (e.v && PR.participanteDeCodigo(e.codigo)) s[e.v] = 1; }); return Object.keys(s).sort(); }
+
+  function metricas() { return TAREAS.map(function (t) { return { t: t, m: PR.metricasTarea(data.p.map(function (p) { return p.t[t.id]; }).filter(Boolean)) }; }); }
+  function renderRes() {
+    var h = "<thead><tr><th>Tarea</th><th>Sin ayuda (nivel 1)</th><th>Con o sin pista</th><th>Meta</th><th>Tiempo medio (s)</th><th>Mediana</th><th>Desv. est.</th><th>Límite</th><th>Errores</th><th>SEQ medio</th></tr></thead><tbody>", lineas = [];
+    metricas().forEach(function (x) {
+      var t = x.t, m = x.m;
+      h += "<tr><td>" + t.id + " " + esc(t.nombre) + '</td><td class="' + (m.tasaSola == null ? "" : m.tasaSola >= META.exito ? "cumple" : "nocumple") + '">' + (m.tasaSola == null ? "—" : f1(m.tasaSola) + " % (" + m.sola + "/" + m.n + ")") + "</td><td>" + (m.tasaConPista == null ? "—" : f1(m.tasaConPista) + " % (" + m.conPista + "/" + m.n + ")") + "</td><td>≥ " + META.exito + " %</td>" +
+        '<td class="' + (m.media == null ? "" : m.media <= t.metaS ? "cumple" : "nocumple") + '">' + f1(m.media) + "</td><td>" + f1(m.mediana) + "</td><td>" + f1(m.desv) + "</td><td>" + t.metaS + "</td><td>" + m.errores + '</td><td class="' + (m.seq == null ? "" : m.seq >= META.seq ? "cumple" : "nocumple") + '">' + f1(m.seq) + "</td></tr>";
+      lineas.push(t.id + " " + t.nombre + ": sin ayuda " + (m.tasaSola == null ? "—" : f1(m.tasaSola) + " %") + ", con o sin pista " + (m.tasaConPista == null ? "—" : f1(m.tasaConPista) + " %") + ", tiempo medio de exitosas " + f1(m.media) + " s (límite " + t.metaS + " s), errores " + m.errores + ", SEQ " + f1(m.seq) + ".");
+    });
+    $("tabla-res").innerHTML = h + "</tbody>";
+    var susv = data.p.map(function (p) { return PR.sus(p.sus); }).filter(function (x) { return x != null; }), sm = PR.media(susv);
+    $("sus-prom").textContent = sm == null ? "—" : f1(sm) + " (" + susv.length + ")";
+    $("n-part").textContent = data.p.length + " participante(s).";
+    $("n-cons").textContent = data.p.filter(function (p) { return p.consent; }).length;
+    var hc = PR.consolidarHallazgos(data.p);
+    $("tabla-hall").innerHTML = hc.length ? "<thead><tr><th>Hallazgo</th><th>Severidad</th><th>Frecuencia</th><th>Participantes</th><th>Prioridad</th></tr></thead><tbody>" + hc.map(function (x) { return "<tr><td>" + esc(x.txt) + "</td><td>" + x.sev + "</td><td>" + x.frec + "</td><td>" + x.quienes.join(", ") + "</td><td>" + x.puntaje + "</td></tr>"; }).join("") + "</tbody>" : "<tbody><tr><td>Aún no hay hallazgos anotados.</td></tr></tbody>";
+    return { lineas: lineas, sus: sm, n: data.p.length, hall: hc };
+  }
+
+  /* Enlaces y QR */
+  function qrSvg(texto) { try { var q = qrcode(0, "M"); q.addData(texto); q.make(); return q.createSvgTag({ cellSize: 3, margin: 2, scalable: true }); } catch (e) { return '<span class="apoyo">QR no disponible</span>'; } }
+  function renderQR() {
+    var total = Math.max(5, data.p.length), html = "";
+    for (var n = 1; n <= total; n++) {
+      html += '<div class="qr-fila"><h3>P' + n + "</h3>" + [["T1 · alta limpia", enlaceT1(n)], ["T2 a T4 · caso de ejemplo", enlaceDemo(n)]].map(function (x) {
+        return '<div class="qr-par"><div class="qr" aria-hidden="true">' + qrSvg(x[1]) + '</div><div><p style="margin:0"><strong>' + x[0] + '</strong></p><p class="apoyo"><code>' + esc(x[1]) + '</code></p><div class="acciones"><button type="button" data-copiar="' + esc(x[1]) + '">Copiar</button>' + (navigator.share ? '<button type="button" data-compartir="' + esc(x[1]) + '">Compartir</button>' : "") + "</div></div></div>";
+      }).join("") + "</div>";
+    }
+    $("qr-lista").innerHTML = html;
+  }
+  $("base-url").addEventListener("change", function () { data.base = this.value.trim(); guardar(); renderQR(); renderFicha(); });
+  $("qr-lista").addEventListener("click", function (e) {
+    var c = e.target.closest("[data-copiar]"), s = e.target.closest("[data-compartir]");
+    if (c) (navigator.clipboard ? navigator.clipboard.writeText(c.getAttribute("data-copiar")) : Promise.reject()).then(function () { msg("Enlace copiado."); }, function () { msg("No se pudo copiar: selecciónelo y cópielo."); });
+    if (s) navigator.share({ title: "Cimiento", url: s.getAttribute("data-compartir") }).catch(function () {});
+  });
+  function imprimir(clase) { document.body.classList.add(clase); window.print(); setTimeout(function () { document.body.classList.remove(clase); }, 500); }
+  $("btn-imprimir-qr").addEventListener("click", function () { imprimir("imprime-qr"); });
+
+  /* Importar registro */
+  function importar(txt) {
+    var ev = PR.eventosDe(txt);
+    if (!ev) { $("imp-msg").textContent = "No reconocimos el registro. Copie el texto completo desde la app (Acerca › Copiar registro)."; return; }
+    var r = PR.combinarEventos(data.eventos, ev.filter(function (e) { return PR.participanteDeCodigo(e.codigo); }));
+    data.eventos = r.lista; guardar();
+    var ps = {}; ev.forEach(function (e) { var p = PR.participanteDeCodigo(e.codigo); if (p) ps[p] = 1; });
+    $("imp-msg").textContent = r.agregados + " evento(s) nuevo(s) importado(s)" + (Object.keys(ps).length ? " de " + Object.keys(ps).join(", ") : "") + ". Los repetidos no se duplican.";
+    $("imp-texto").value = ""; renderFicha();
+  }
+  $("btn-importar").addEventListener("click", function () { importar($("imp-texto").value); });
+  $("imp-archivo").addEventListener("change", function () { var f = this.files[0]; if (!f) return; var lr = new FileReader(); lr.onload = function () { importar(String(lr.result)); }; lr.readAsText(f); this.value = ""; });
+
+  /* Eventos del formulario */
+  $("sel-p").addEventListener("change", function () { actual = parseInt(this.value, 10); detener(); renderFicha(); });
+  $("btn-nuevo").addEventListener("click", function () { data.p.push(nuevoP()); actual = data.p.length - 1; guardar(); renderSel(); renderFicha(); renderRes(); renderQR(); });
+  $("btn-borrar").addEventListener("click", function () {
+    var p = data.p[actual]; if (!p) return;
+    if (this.dataset.c !== "1") { this.dataset.c = "1"; this.textContent = "Confirmar: borrar " + p.id; var b = this; setTimeout(function () { b.dataset.c = ""; b.textContent = "Borrar este participante"; }, 4000); return; }
+    data.p.splice(actual, 1); data.p.forEach(function (q, i) { q.id = "P" + (i + 1); }); actual = data.p.length ? 0 : -1; this.dataset.c = ""; this.textContent = "Borrar este participante";
+    guardar(); renderSel(); renderFicha(); renderRes(); renderQR();
+  });
+  ["edad", "genero", "exp", "disp", "so", "notas", "diez", "frase"].forEach(function (k) { $(k).addEventListener("input", function () { var p = data.p[actual]; if (p) { p[k] = this.value; guardar(); } }); });
+  $("consent").addEventListener("change", function () { var p = data.p[actual]; if (p) { p.consent = this.checked; guardar(); renderRes(); } });
+  $("problemas").addEventListener("input", function (e) {
+    var el = e.target, k = el.dataset.hk, p = data.p[actual]; if (!k || !p) return;
+    var i = parseInt(el.closest("[data-h]").dataset.h, 10); p.problemas[i] = p.problemas[i] || {};
+    p.problemas[i][k] = k === "sev" ? (el.value ? parseInt(el.value, 10) : null) : el.value; guardar(); renderRes();
+  });
+  $("problemas").addEventListener("change", function (e) { if (e.target.tagName === "SELECT") e.target.dispatchEvent(new Event("input", { bubbles: true })); });
+  function detener() { if (corriendo) { clearInterval(corriendo.iv); corriendo = null; } }
+  $("tareas").addEventListener("click", function (e) {
+    var ab = e.target.closest("[data-abrir]"); if (ab) { var t0 = TAREAS.filter(function (x) { return x.id === ab.getAttribute("data-abrir"); })[0]; preparar(t0, data.p[actual]); return; }
+    var b = e.target.closest("[data-a]"); if (!b) return;
+    var cont = b.closest("[data-t]"), id = cont.dataset.t, p = data.p[actual], cron = cont.querySelector("[data-cron]");
+    p.t[id] = p.t[id] || {};
+    if (b.dataset.a === "ini") { detener(); var ini = performance.now(); p.t[id].inicio = new Date().toISOString(); corriendo = { id: id, t0: ini, iv: setInterval(function () { cron.textContent = f1((performance.now() - ini) / 1000) + " s"; }, 100) }; guardar(); }
+    else if (corriendo && corriendo.id === id) {
+      p.t[id].s = Math.round((performance.now() - corriendo.t0) / 100) / 10; detener(); cron.textContent = f1(p.t[id].s) + " s";
+      if (!p.t[id].toque) {
+        var cod = (id === "T1" ? "alta-p" : "demo-p") + num(p), ev = todosEventos().filter(function (x) { return x.codigo === cod && x.t >= p.t[id].inicio && /^toque:/.test(x.tipo); })[0];
+        if (ev) { p.t[id].toque = aToque(ev.tipo); cont.querySelector('[data-k="toque"]').value = p.t[id].toque; }
+      }
+      guardar(); renderRes();
+    }
+  });
+  $("tareas").addEventListener("input", function (e) {
+    var el = e.target, k = el.dataset.k; if (!k) return;
+    var id = el.closest("[data-t]").dataset.t, p = data.p[actual]; p.t[id] = p.t[id] || {};
+    if (k === "obs" || k === "toque" || k === "pista") p.t[id][k] = el.value; else p.t[id][k] = el.value === "" ? null : parseFloat(el.value);
+    guardar(); renderRes();
+  });
+  $("tareas").addEventListener("change", function (e) { if (e.target.tagName === "SELECT") e.target.dispatchEvent(new Event("input", { bubbles: true })); });
+  $("sus").addEventListener("change", function (e) {
+    var el = e.target; if (el.dataset.s == null) return;
+    var p = data.p[actual]; p.sus[parseInt(el.dataset.s, 10)] = el.value === "" ? 0 : parseInt(el.value, 10);
+    for (var i = 0; i < 10; i++) if (p.sus[i] == null) p.sus[i] = 0;
+    guardar(); var sp = PR.sus(p.sus); $("sus-valor").textContent = sp == null ? "—" : f1(sp); renderRes();
+  });
+  function descargar(nombre, tipo, txt) { var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt], { type: tipo })); a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); }
+  function copiar(txt, ok) { (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () { msg(ok); }, function () { msg("No se pudo copiar automáticamente."); }); }
+  $("btn-csv").addEventListener("click", function () {
+    var filas = [["participante", "edad", "genero", "experiencia", "dispositivo", "modelo", "consentimiento", "version_app"].concat(TAREAS.reduce(function (a, t) { return a.concat([t.id + "_exito", t.id + "_pista", t.id + "_segundos", t.id + "_primer_toque", t.id + "_deslices", t.id + "_equivocaciones", t.id + "_errores_criticos", t.id + "_SEQ", t.id + "_nota"]); }, [])).concat(["SUS", "entiende_10s", "observaciones", "problema_1", "sev_1", "problema_2", "sev_2", "problema_3", "sev_3", "frase", "uso_deshacer", "omitio_recorrido"])];
+    data.p.forEach(function (p) {
+      var n = num(p), evs = eventosDe(n), hubo = function (tipo) { return evs.some(function (e) { return e.tipo === tipo; }) ? "si" : "no"; };
+      var f = [p.id, p.edad, p.genero, p.exp, p.disp, p.so, p.consent ? "si" : "no", versiones(n).join(" ")];
+      TAREAS.forEach(function (t) { var r = p.t[t.id] || {}; f.push(r.ok == null ? "" : String(r.ok).replace(".", ","), r.pista || "", r.s == null ? "" : String(r.s).replace(".", ","), r.toque || "", r.desl == null ? "" : r.desl, r.equiv == null ? "" : r.equiv, r.crit == null ? "" : r.crit, r.seq == null ? "" : r.seq, r.obs || ""); });
+      var sp = PR.sus(p.sus); f.push(sp == null ? "" : String(sp).replace(".", ","), p.diez || "", p.notas || "");
+      [0, 1, 2].forEach(function (i) { var h = p.problemas[i] || {}; f.push(h.txt || "", h.sev || ""); });
+      f.push(p.frase || "", hubo("deshacer"), hubo("tour_omitir")); filas.push(f);
+    });
+    descargar("cimiento-pruebas-v2.csv", "text/csv;charset=utf-8", "﻿" + filas.map(function (f) { return f.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(","); }).join("\n")); msg("CSV descargado.");
+  });
+  $("btn-eventos").addEventListener("click", function () { descargar("cimiento-registro-app.json", "application/json", JSON.stringify({ app: "Cimiento", exportado: new Date().toISOString(), eventos: todosEventos() }, null, 1)); msg("Registro descargado (sin nombres, RUT, claves ni montos)."); });
+  $("btn-copiar").addEventListener("click", function () { var r = renderRes(); copiar("Resumen de pruebas de Cimiento (protocolo v2)\nParticipantes: " + r.n + "\n" + r.lineas.join("\n") + "\nSUS promedio: " + f1(r.sus) + " (meta > " + META.sus + ").", "Resumen copiado."); });
+  $("btn-respaldo").addEventListener("click", function () { descargar("cimiento-respaldo-pruebas.json", "application/json", JSON.stringify({ tipo: "respaldo-test-cimiento", fecha: new Date().toISOString(), datos: data, eventosApp: eventosApp() }, null, 1)); msg("Respaldo descargado."); });
+  $("res-archivo").addEventListener("change", function () {
+    var f = this.files[0]; if (!f) return; var lr = new FileReader();
+    lr.onload = function () {
+      try { var r = JSON.parse(String(lr.result)); if (!r || !r.datos || !r.datos.p) throw 0; data = migrar(r.datos); if (r.eventosApp) data.eventos = PR.combinarEventos(data.eventos, r.eventosApp.filter(function (e) { return PR.participanteDeCodigo(e.codigo); })).lista; actual = data.p.length ? 0 : -1; guardar(); iniciar(); msg("Respaldo restaurado."); }
+      catch (e) { msg("Ese archivo no es un respaldo de este registro."); }
+    };
+    lr.readAsText(f); this.value = "";
+  });
+  $("btn-reset").addEventListener("click", function () {
+    if (this.dataset.c !== "1") { this.dataset.c = "1"; this.textContent = "Confirmar: borrar todo (no se puede deshacer)"; var b = this; setTimeout(function () { b.dataset.c = ""; b.textContent = "Borrar todo"; }, 5000); return; }
+    data = migrar({ p: [] }); actual = -1; guardar(); this.dataset.c = ""; this.textContent = "Borrar todo"; iniciar(); msg("Se borró todo el registro de este navegador.");
+  });
+
+  /* Resumen CIF (ISO/IEC 25062) */
+  function textoCIF() {
+    var r = renderRes(), ps = data.p, edades = ps.map(function (p) { return parseInt(p.edad, 10); }).filter(function (x) { return x > 0; });
+    var cuenta = function (k) { var c = {}; ps.forEach(function (p) { var v = p[k] || "sin dato"; c[v] = (c[v] || 0) + 1; }); return Object.keys(c).map(function (x) { return x + " " + c[x]; }).join(", ") || "—"; };
+    return { r: r, edades: edades.length ? Math.min.apply(null, edades) + " a " + Math.max.apply(null, edades) + " años" : "—", genero: cuenta("genero"), exp: cuenta("exp"), disp: cuenta("disp") };
+  }
+  function renderCIF() {
+    var x = textoCIF(), m = metricas(), fecha = new Date().toLocaleDateString("es-CL");
+    $("cif").innerHTML = "<h1>Cimiento · Resumen de pruebas (formato CIF)</h1><p class=\"apoyo\">Prototipo académico, sin valor legal; no es una oferta de Bci. Generado el " + fecha + ".</p>" +
+      "<h2>Participantes</h2><p>n = " + x.r.n + " · edad: " + x.edades + " · género: " + esc(x.genero) + " · experiencia con apps bancarias: " + esc(x.exp) + " · sistema: " + esc(x.disp) + ".</p>" +
+      "<h2>Tareas</h2><ol>" + TAREAS.map(function (t) { return "<li><strong>" + t.id + " " + esc(t.nombre) + "</strong> (máx. " + t.metaS + " s): «" + esc(t.esc) + "»</li>"; }).join("") + "</ol>" +
+      "<h2>Métricas contra metas</h2><table><thead><tr><th>Tarea</th><th>Éxito sin ayuda (meta ≥ " + META.exito + " %)</th><th>Con o sin pista</th><th>Tiempo de exitosas: media / mediana / desv. (s)</th><th>SEQ (meta ≥ 5,5)</th></tr></thead><tbody>" +
+      m.map(function (y) { var k = y.m; return "<tr><td>" + y.t.id + "</td><td>" + (k.tasaSola == null ? "—" : f1(k.tasaSola) + " %") + "</td><td>" + (k.tasaConPista == null ? "—" : f1(k.tasaConPista) + " %") + "</td><td>" + f1(k.media) + " / " + f1(k.mediana) + " / " + f1(k.desv) + "</td><td>" + f1(k.seq) + "</td></tr>"; }).join("") +
+      "</tbody></table><p>SUS promedio: <strong>" + f1(x.r.sus) + "</strong> (meta &gt; 68).</p>" +
+      "<h2>Hallazgos (severidad × frecuencia)</h2>" + (x.r.hall.length ? "<ol>" + x.r.hall.map(function (h) { return "<li>" + esc(h.txt) + " · severidad " + h.sev + " · " + h.frec + " participante(s)</li>"; }).join("") + "</ol>" : "<p>Sin hallazgos anotados.</p>") +
+      "<h2>Mejoras propuestas</h2><textarea id=\"cif-mejoras\" rows=\"5\" style=\"width:100%\">" + esc(data.mejoras) + "</textarea>" +
+      "<p class=\"apoyo\">Referencias: ISO/IEC 25062:2006, Common Industry Format for usability test reports. Brooke, J. (1996). SUS: a quick and dirty usability scale.</p>";
+    $("sec-cif").hidden = false; $("sec-cif").scrollIntoView({ block: "start" });
+    $("cif-mejoras").addEventListener("input", function () { data.mejoras = this.value; guardar(); });
+  }
+  $("btn-cif").addEventListener("click", renderCIF);
+  $("btn-cif-imprimir").addEventListener("click", function () { imprimir("imprime-cif"); });
+  $("btn-cif-cerrar").addEventListener("click", function () { $("sec-cif").hidden = true; });
+  $("btn-cif-copiar").addEventListener("click", function () {
+    var x = textoCIF(), m = metricas();
+    var t = ["Cimiento · Resumen de pruebas (formato CIF)", "Participantes: n = " + x.r.n + "; edad " + x.edades + "; género " + x.genero + "; experiencia " + x.exp + "; sistema " + x.disp + "."]
+      .concat(m.map(function (y) { var k = y.m; return y.t.id + " " + y.t.nombre + ": sin ayuda " + (k.tasaSola == null ? "—" : f1(k.tasaSola) + " %") + ", con o sin pista " + (k.tasaConPista == null ? "—" : f1(k.tasaConPista) + " %") + ", tiempo (exitosas) " + f1(k.media) + " / " + f1(k.mediana) + " / " + f1(k.desv) + " s, SEQ " + f1(k.seq) + "."; }))
+      .concat(["SUS promedio: " + f1(x.r.sus) + " (meta > 68).", "Hallazgos:"]).concat(x.r.hall.map(function (h, i) { return (i + 1) + ". " + h.txt + " (severidad " + h.sev + ", " + h.frec + " participante/s)"; }))
+      .concat(["Mejoras propuestas: " + (data.mejoras || "—"), "Referencias: ISO/IEC 25062; Brooke (1996)."]).join("\n");
+    copiar(t, "Resumen CIF copiado.");
+  });
+
+  function iniciar() {
+    /* La dirección pública es la del sitio desde el que se abre este registro. Si hay una guardada de otro sitio (p. ej. un respaldo de una dirección anterior), se reemplaza. */
+    if (/^https?:$/.test(location.protocol)) {
+      var actual = location.origin + location.pathname.replace(/[^/]*$/, "");
+      var host = ""; try { host = new URL(data.base || "", location.href).host; } catch (e) {}
+      if (!data.base || host !== location.host) { data.base = actual; guardar(); }
+    }
+    $("base-url").value = data.base || ""; renderSel(); renderFicha(); renderRes(); renderQR(); }
+  iniciar();
+})();
+</script>
+</body>
+</html>

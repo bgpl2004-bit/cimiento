@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<meta name="theme-color" content="#2772CC">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cimiento">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Cimiento: el pie de su casa, de a dos. Prototipo académico (Taller de Interacción IV, UDD) para Bci Labs. Concepto 2050 · simulado, no es una oferta de Bci.">
+<title>Cimiento</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/overpass-latin-variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- Íconos y logo (símbolos reutilizables). El logo sigue la geometría oficial de Cimiento: no se redibuja ni se recolorea. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="logo-cimiento" viewBox="-4 -4 151 155">
+    <path class="lg-techo" d="M8.5 61 L72 10 L135.5 61" fill="none" stroke="#1D5699" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect class="lg-b1" x="36" y="78" width="71" height="17" rx="8.5" fill="#2772CC"/>
+    <rect class="lg-b2" x="20" y="104" width="103" height="17" rx="8.5" fill="#28892B"/>
+    <rect class="lg-b3" x="4" y="130" width="135" height="17" rx="8.5" fill="#FFE300"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-alerta" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 6.5v7" stroke="#2C3A41" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.5" fill="#2C3A41"/></symbol>
+  <symbol id="i-error" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.6" r="1.4" fill="currentColor"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.4" fill="currentColor"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-abajo" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-cerrar" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-mas" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-menos" viewBox="0 0 24 24"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-ojo" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.9"/></symbol>
+  <symbol id="i-ojo-no" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M4 20L20 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-campana" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+  <symbol id="i-aportes" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="15" cy="7" r="2.3" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="9" cy="17" r="2.3" fill="none" stroke="currentColor" stroke-width="1.9"/></symbol>
+  <symbol id="i-premios" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+  <symbol id="i-casa" viewBox="0 0 24 24"><path d="M3.5 11L12 4l8.5 7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10v9.5h13V10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M10 19.5v-5h4v5" fill="none" stroke="currentColor" stroke-width="1.9"/></symbol>
+  <symbol id="i-juntos" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2.5 19c.9-3.3 3.1-5 6-5s5.1 1.7 6 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="16.5" cy="9" r="2.7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 14.2c2.6-.3 4.8 1.2 5.8 4.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-cuenta" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c1.2-4 4-5.5 7-5.5s5.8 1.5 7 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol> viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M4.5 20c1.2-3.6 4-5.3 7.5-5.3s6.3 1.7 7.5 5.3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+  <symbol id="i-candado" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="1.9"/></symbol>
+  <symbol id="i-bandera" viewBox="0 0 24 24"><path d="M6 21V4M6 4h11l-2.5 4L17 12H6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div id="aviso-red" class="banner-red" role="status" hidden><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span>Sin conexión: puede mirar su casa; los aportes esperan.</span></div>
+
+<main id="app" class="app">
+
+  <!-- 2.1 Carga: logo animado; esqueletos si los datos tardan -->
+  <section id="pantalla-carga" class="pantalla carga" aria-label="Cargando Cimiento" hidden>
+    <div class="carga-marca">
+      <svg class="logo-anim" width="96" height="98" viewBox="-4 -4 151 155" aria-hidden="true" focusable="false">
+        <path class="la-techo" d="M8.5 61 L72 10 L135.5 61" fill="none" stroke="#1D5699" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
+        <rect class="la-pista" x="36" y="78" width="71" height="17" rx="8.5"/><rect class="la-pista" x="20" y="104" width="103" height="17" rx="8.5"/><rect class="la-pista" x="4" y="130" width="135" height="17" rx="8.5"/>
+        <rect class="la-b la-b1" x="36" y="78" width="71" height="17" rx="8.5" fill="#2772CC"/><rect class="la-b la-b2" x="20" y="104" width="103" height="17" rx="8.5" fill="#28892B"/><rect class="la-b la-b3" x="4" y="130" width="135" height="17" rx="8.5" fill="#FFE300"/>
+      </svg>
+      <p class="carga-nombre">Cimiento</p>
+    </div>
+    <div id="carga-esq" class="carga-esq" hidden aria-hidden="true"><div class="esq esq-sup"></div><div class="esq esq-casa"></div></div>
+    <p class="solo-lector" role="status">Cargando.</p>
+  </section>
+
+  <!-- 2.2 Entrada: ingreso con la cuenta Bci (simulado y local) -->
+  <section id="pantalla-entrada" class="pantalla entrada" aria-labelledby="t-entrada" hidden>
+    <div class="entrada-cuerpo">
+      <p class="entrada-desafio">Bci Labs · Desafío</p>
+      <div class="entrada-marca">
+        <svg class="logo-88" width="88" height="90" aria-hidden="true" focusable="false"><use href="#logo-cimiento"/></svg>
+        <h1 id="t-entrada" class="entrada-nombre">Cimiento</h1>
+        <p class="entrada-bajada">El pie de su casa, de a dos.</p>
+      </div>
+
+      <form id="form-login" class="form-login" novalidate>
+        <h2 class="h3">Ingrese con su cuenta Bci</h2>
+        <div class="campo">
+          <input id="rut" name="rut" type="text" inputmode="text" autocomplete="off" enterkeyhint="next" autocapitalize="characters" spellcheck="false" maxlength="12" placeholder=" " aria-describedby="err-rut">
+          <label for="rut">RUT</label>
+        </div>
+        <p id="err-rut" class="error" aria-live="assertive" hidden></p>
+        <div class="campo con-accion">
+          <input id="clave" name="clave" type="password" autocomplete="off" enterkeyhint="go" placeholder=" " aria-describedby="err-clave">
+          <label for="clave">Clave</label>
+          <button id="ver-clave" class="campo-accion" type="button" aria-label="Mostrar clave" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-ojo"/></svg></button>
+        </div>
+        <p id="err-clave" class="error" aria-live="assertive" hidden></p>
+        <button id="btn-ingresar" class="boton primario" type="submit"><span class="b-txt">Ingresar</span><i class="b-carga" aria-hidden="true"></i></button>
+        <p id="login-espera" class="aviso aviso-azul" role="status" hidden></p>
+        <p class="aviso aviso-amarillo"><svg class="ic" aria-hidden="true"><use href="#i-alerta"/></svg><span>Demostración: no use su clave real. Estos datos no se guardan ni se envían.</span></p>
+      </form>
+
+      <div class="entrada-alt">
+        <button id="btn-demo" class="boton secundario" type="button">Probar con el caso de ejemplo</button>
+        <button id="btn-tengo-codigo" class="enlace" type="button" aria-expanded="false" aria-controls="form-codigo">Tengo un código compartido</button>
+        <form id="form-codigo" class="tarjeta form-codigo" autocomplete="off" hidden>
+          <div class="campo">
+            <input id="codigo" name="codigo" type="text" inputmode="text" autocomplete="off" enterkeyhint="go" autocapitalize="none" spellcheck="false" placeholder=" " aria-describedby="ayuda-codigo" required>
+            <label for="codigo">Código compartido</label>
+          </div>
+          <p id="ayuda-codigo" class="ayuda">Usen el mismo código los dos para ver el mismo viaje.</p>
+          <button class="boton primario" type="submit">Continuar</button>
+        </form>
+        <div id="paso-persona" class="tarjeta" hidden>
+          <h2 class="h3">¿Quién es usted?</h2>
+          <div id="botones-persona" class="pila"></div>
+        </div>
+        <p id="estado-conexion" class="ayuda" role="status"></p>
+      </div>
+    </div>
+    <p class="rotulo-pie">Concepto 2050 · simulado, no es una oferta de Bci</p>
+  </section>
+
+  <!-- 2.3 Alta en 5 pasos -->
+  <section id="pantalla-alta" class="pantalla alta" aria-labelledby="alta-titulo" hidden>
+    <header class="alta-cab">
+      <p id="alta-paso-txt" class="alta-paso-txt">Paso 1 de 5</p>
+      <div class="alta-barra" role="progressbar" aria-label="Avance del alta" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1"><i id="alta-barra"></i></div>
+    </header>
+    <form id="form-alta" class="alta-form" novalidate>
+      <h1 id="alta-titulo" class="h1">Sus datos Bci</h1>
+      <div id="alta-cuerpo" class="alta-cuerpo"></div>
+      <p id="err-alta" class="error" role="alert" hidden></p>
+    </form>
+    <footer class="alta-pie">
+      <p id="alta-motivo" class="alta-motivo" aria-live="polite"></p>
+      <div class="alta-botones">
+        <button id="alta-atras" class="boton secundario" type="button">Atrás</button>
+        <button id="alta-sig" class="boton primario" type="submit" form="form-alta">Siguiente</button>
+      </div>
+    </footer>
+  </section>
+
+  <!-- App con sesión -->
+  <section id="pantalla-app" class="pantalla app-con-sesion" hidden>
+    <header id="cabecera" class="cabecera">
+      <svg class="olas" viewBox="0 0 390 30" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <path fill="#2772CC" d="M0 0 H390 V14 C335 22 292 7 232 12 C172 17 122 24 62 17 C36 13 14 14 0 17 Z"/>
+        <path fill="none" stroke="#28892B" stroke-width="2.5" d="M0 21 C14 18 36 17 62 20 C122 28 172 21 232 16 C292 11 335 26 390 18"/>
+        <path fill="none" stroke="#FFE300" stroke-width="2.2" d="M0 25.5 C14 22.5 36 21.5 62 24.5 C122 32 172 25 232 20 C292 15 335 30 390 22"/>
+      </svg>
+      <div class="cab-fila">
+        <button id="btn-menu" class="boton-icono" type="button" aria-haspopup="dialog" aria-label="Menú"><svg class="ic" aria-hidden="true"><use href="#i-menu"/></svg></button>
+        <div class="lockup"><img class="logo-bci" src="assets/logo_bci_negro.svg" alt="Bci" width="48" height="22"><span class="lockup-sep" aria-hidden="true"></span><span class="marca-app">Cimiento</span></div>
+        <button id="btn-campana" class="boton-icono" type="button" aria-haspopup="dialog" aria-label="Actividad"><svg class="ic" aria-hidden="true"><use href="#i-campana"/></svg><span id="campana-badge" class="badge" hidden></span></button>
+      </div>
+      <p id="aviso-estado" class="aviso-estado" role="status" hidden></p>
+    </header>
+
+    <!-- Camino: la casita actual, una cifra, Aportar y el camino (lo principal) -->
+    <div id="vista-ruta" class="vista vista-ruta" role="tabpanel" aria-labelledby="tab-ruta">
+      <div id="r-fija" class="sup-fija">
+      <div id="r-sup" class="tarjeta-sup heroe">
+        <div class="sup-fila">
+          <p class="sup-quien"><span id="r-avatar" class="avatar av-p1" aria-hidden="true">T</span><span id="r-heroe-et">Casita</span></p>
+          <button id="ojo-ruta" class="boton-icono ojo" type="button" aria-pressed="false" aria-label="Ocultar montos"><svg class="ic" aria-hidden="true"><use href="#i-ojo"/></svg></button>
+        </div>
+        <div class="heroe-fila">
+          <button id="r-cifra-btn" class="sup-cifra" type="button" aria-haspopup="dialog">
+            <span id="r-cifra-meta" class="sup-meta"></span>
+            <span id="r-cifra" class="sup-num tabular">—</span>
+          </button>
+          <button id="r-aportar" class="boton primario" type="button" aria-haspopup="dialog">Aportar</button>
+        </div>
+      </div>
+      </div>
+      <div class="aviso-zona"><button id="r-aviso" class="pildora-aviso" type="button" hidden></button>
+        <section id="r-prop" class="tarjeta-prop" aria-labelledby="r-prop-t" hidden><p id="r-prop-t" class="tp-t">Su camino puede ajustarse</p><p id="r-prop-s" class="tp-s"></p><button id="r-prop-ver" class="boton primario" type="button">Ver propuesta</button></section></div>
+      <button id="btn-deslice" class="pista-deslice" type="button" hidden>Ver su camino</button>
+      <section id="r-camino" class="camino-zona" aria-label="Su camino">
+        <div id="camino-mapa" class="camino-mapa"></div>
+        <ol id="camino-lista" class="solo-lector" aria-label="Su camino, de la casita 1 a la 10"></ol>
+      </section>
+    </div>
+
+    <!-- Plan (id aportes): personalización que mueve el camino; se arma con js/plan.js -->
+    <div id="vista-aportes" class="vista" role="tabpanel" aria-labelledby="tab-aportes" hidden>
+      <h1 class="titulo-vista">Plan</h1>
+      <div id="plan-cuerpo"></div>
+    </div>
+
+    <!-- Beneficios (id premios): mis casitas como bien, premios de Bci y constancia -->
+    <div id="vista-premios" class="vista" role="tabpanel" aria-labelledby="tab-premios" hidden>
+      <h1 class="titulo-vista">Beneficios</h1>
+      <section class="mis-casitas-sec" aria-labelledby="t-mc">
+        <h2 id="t-mc" class="rotulo">Mis casitas</h2>
+        <p id="mc-valor" class="mc-valor tabular"></p>
+        <ul id="casitas-fila" class="mis-casitas"></ul>
+      </section>
+      <h2 class="rotulo">Premios de Bci</h2>
+      <p class="nota nota-top">Solo suman los aportes verificados por Bci. Concepto 2050 simulado.</p>
+      <p id="pr-decl" class="aviso aviso-amarillo pr-decl" hidden></p>
+      <section class="tarjeta" aria-labelledby="t-pr-avance">
+        <h2 id="t-pr-avance" class="rotulo solo-lector">Su avance hacia los premios</h2>
+        <div id="pr-pista" class="pr-pista"></div>
+        <p id="pr-resumen" class="pr-resumen"></p>
+      </section>
+      <section id="pr-prox" class="tarjeta tarjeta-prox" aria-labelledby="t-pr-prox"></section>
+      <ol id="r-hitos" class="premios-lista"></ol>
+      <h2 class="rotulo">Constancia</h2>
+      <section id="pr-constancia" class="tarjeta" aria-label="Constancia"></section>
+      <section id="ap-auto" class="tarjeta ap-auto" aria-label="Aporte automático y recordatorio"></section>
+    </div>
+
+    <!-- Casa (id juntos): la vivienda, quién construyó qué y el registro compartido de aportes -->
+    <div id="vista-juntos" class="vista" role="tabpanel" aria-labelledby="tab-juntos" hidden>
+      <h1 class="titulo-vista">Casa</h1>
+      <section id="r-casa" class="casa-zona" aria-label="La casa armada">
+        <div class="mapa-titulo" hidden><p class="mt-et">Pie de la vivienda</p><p id="mt-cifra" class="mt-cifra">$121,2 M</p><p id="mt-pildora" class="mt-pildora"></p></div>
+        <div id="mapa" class="mapa"></div>
+      </section>
+      <div id="j-hero"></div>
+      <p id="j-bajada" class="bajada" hidden></p>
+      <h2 class="rotulo reg-tit">Registro de aportes <button id="reg-ayuda" class="boton-icono ayuda-q" type="button" aria-expanded="false" aria-controls="reg-explica" aria-label="¿Verificado o declarado?">?</button></h2>
+      <div id="reg-explica" class="explica-pl" hidden>
+        <p><strong>Verificado:</strong> Bci lo comprobó. Suma a premios.</p>
+        <p><strong>Declarado:</strong> otra institución. Suma a la casa, no a premios.</p>
+      </div>
+      <section id="ap-mes" hidden></section>
+      <div class="filtros" role="group" aria-label="Filtrar aportes">
+        <button class="chip-filtro" type="button" data-filtro="todos" aria-pressed="true">Todos</button>
+        <button class="chip-filtro" type="button" data-filtro="declarados" aria-pressed="false">Declarados</button>
+        <button class="chip-filtro" type="button" data-filtro="verificados" aria-pressed="false">Verificados</button>
+      </div>
+      <ul id="lista-hist" class="lista-aportes" aria-live="polite"></ul>
+      <p id="hist-vacio" class="ayuda" hidden>No hay aportes con este filtro.</p>
+      <div id="j-cuerpo" aria-live="polite"></div>
+    </div>
+
+    <!-- Mi cuenta -->
+    <div id="vista-cuenta" class="vista" role="tabpanel" aria-labelledby="tab-cuenta" hidden>
+      <h1 class="titulo-vista">Cuenta</h1>
+      <h2 class="rotulo">Perfil</h2>
+      <ul class="lista-filas">
+        <li><button id="c-perfil" class="fila" type="button"><span id="c-perfil-txt"></span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li><button id="c-invitar" class="fila" type="button"><span>Invitar a mi pareja o familiar</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+      </ul>
+      <h2 class="rotulo">Mi viaje</h2>
+      <ul class="lista-filas">
+        <li><button id="c-situacion" class="fila" type="button"><span>Mi situación y mi camino</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li><button id="c-vinculo" class="fila" type="button"><span>Con quién ahorro <small id="c-vinculo-txt"></small></span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+      </ul>
+      <h2 class="rotulo">Privacidad y seguridad</h2>
+      <ul class="lista-filas">
+        <li><button id="c-pin" class="fila" type="button"><span>PIN de acceso <small id="c-pin-estado"></small></span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li><button id="c-datos" class="fila" type="button"><span>Mis datos y consentimientos</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li><label class="fila interruptor"><span>Ocultar montos</span><input id="c-ocultar" type="checkbox" role="switch"><span class="int-pista" aria-hidden="true"></span></label></li>
+      </ul>
+      <h2 class="rotulo">Preferencias</h2>
+      <ul class="lista-filas">
+        <li><button id="c-notif" class="fila" type="button"><span>Notificaciones</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li><label class="fila interruptor"><span>Reducir animaciones</span><input id="a-movimiento" type="checkbox" role="switch"><span class="int-pista" aria-hidden="true"></span></label></li>
+        <li><button id="c-acces" class="fila" type="button"><span>Accesibilidad</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li><button id="c-instalar" class="fila" type="button"><span>Instalar en el teléfono</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+      </ul>
+      <h2 class="rotulo">Ayuda</h2>
+      <ul class="lista-filas">
+        <li><button id="c-tour" class="fila" type="button"><span>Repetir recorrido</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li hidden><button id="c-primeros" class="fila" type="button"><span>Primeros pasos</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li><button id="c-glosario" class="fila" type="button"><span>Glosario y ayuda</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li><button id="c-acerca" class="fila" type="button"><span>Acerca de este prototipo</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+      </ul>
+      <button id="btn-salir" class="enlace" type="button">Cerrar sesión</button>
+      <p class="nota">Cimiento nunca ve ni guarda su clave.</p>
+    </div>
+  </section>
+</main>
+
+<!-- 4.4 Simular un cambio (hoja casi completa) -->
+<dialog id="simular" class="hoja hoja-alta" aria-labelledby="t-simular">
+  <div class="hoja-asa" aria-hidden="true"></div>
+  <div class="hoja-cab"><div><h2 id="t-simular" class="h2">Simular un cambio</h2><p class="bajada" style="margin:0">¿Y si ahorrara de otra forma?</p></div><button class="boton-icono cerrar-claro" type="button" data-cerrar="simular" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-cerrar"/></svg></button></div>
+  <div class="hoja-cuerpo">
+      <p id="sim-tip" class="aviso aviso-azul" role="status" hidden><span>Mueva el control para ver cómo cambia el plazo.</span><button id="sim-tip-ok" class="enlace" type="button">Entendido</button></p>
+      <fieldset id="camino" class="seg seg-3 seg-radios">
+        <legend class="solo-lector">¿Con quién postulan al crédito?</legend>
+        <div class="seg-pista">
+          <label><input type="radio" name="camino" value="solo"><span>Solo</span></label>
+          <label><input type="radio" name="camino" value="familiar"><span>Con familiar</span></label>
+          <label><input type="radio" name="camino" value="pareja" checked><span>Con pareja</span></label>
+        </div>
+      </fieldset>
+      <section class="tarjeta esc-hero" aria-live="polite">
+        <p class="esc-num"><span id="esc-num">20</span> <span id="esc-unidad">meses</span></p>
+        <p id="esc-sub" class="esc-sub"></p>
+        <p id="esc-nota" class="nota" hidden></p>
+        <div class="esc-barras" aria-hidden="true">
+          <div class="esc-fila"><span>Solo</span><span id="esc-solo-m"></span><span class="esc-barra"><i id="esc-solo-b"></i></span></div>
+          <div id="esc-fila-sel" class="esc-fila sel"><span id="esc-sel-n"></span><span id="esc-sel-m"></span><span class="esc-barra"><i id="esc-sel-b"></i></span></div>
+        </div>
+        <p id="esc-frase" class="solo-lector"></p>
+      </section>
+      <section class="tarjeta esc-aporte" aria-labelledby="t-esc-aporte">
+        <h2 id="t-esc-aporte" class="h4">Aporte mensual entre ambos</h2>
+        <div class="stepper grande">
+          <button id="slider-menos" class="paso-btn" type="button" aria-label="Restar $50.000"><svg class="ic" aria-hidden="true"><use href="#i-menos"/></svg></button>
+          <output id="slider-valor" for="slider" class="stepper-valor">$1.000.000</output>
+          <button id="slider-mas" class="paso-btn" type="button" aria-label="Sumar $50.000"><svg class="ic" aria-hidden="true"><use href="#i-mas"/></svg></button>
+        </div>
+        <input id="slider" class="rango" type="range" min="500000" max="3000000" step="50000" value="1000000" aria-label="Aporte mensual entre ambos">
+        <div class="rango-ext" aria-hidden="true"><span>$500.000</span><span>$3.000.000</span></div>
+        <p id="slider-meses" class="ayuda" aria-live="polite"></p>
+      </section>
+      <button id="btn-esc-det" class="enlace centrado" type="button">Cómo se calcula y qué requisitos aplican<svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button>
+      <p class="nota centrado">Simulación, no una evaluación de Bci. El banco decide.</p>
+      <div id="sim-usar-zona" class="pila" hidden><p id="sim-usar-txt" class="hoja-nota"></p><button id="sim-usar" class="boton primario" type="button">Usar este camino</button></div>
+  </div>
+</dialog>
+
+
+<!-- Botones flotantes y barra inferior -->
+<div id="fade-inf" class="fade-inf" aria-hidden="true" hidden></div>
+<button id="btn-volver" class="volver-casita" type="button" aria-label="Volver a mi casita en curso" hidden><svg class="ic" aria-hidden="true"><use href="#i-abajo"/></svg></button>
+<button id="btn-mas" class="aportar-flotante" type="button" aria-haspopup="dialog" hidden><svg class="ic" aria-hidden="true"><use href="#i-mas"/></svg><span>Aportar</span></button>
+<section id="ajuste-panel" class="ajuste-panel" aria-labelledby="aj-titulo" hidden>
+  <p class="sello-prop"><img src="assets/logo_bci_negro.svg" alt="Bci" width="30" height="14"><span>· Propuesta</span></p>
+  <h2 id="aj-titulo" class="h4">Propuesta para su camino</h2>
+  <p class="aj-txt">Las casitas logradas se mantienen. Cambian solo las que faltan. <button id="aj-simular" class="enlace aj-sim" type="button">Simular otro monto</button></p>
+  <p id="aj-fila" class="aj-fila"></p>
+  <div class="aj-botones"><button id="aj-no" class="boton secundario" type="button">Ahora no</button><button id="aj-si" class="boton primario" type="button">Aceptar</button></div>
+</section>
+<nav id="barra-inf" class="barra-inf" aria-label="Navegación principal" hidden>
+  <div id="tabs" class="tabs" role="tablist">
+    <button id="tab-aportes" class="tab" type="button" role="tab" data-vista="aportes" aria-selected="false" aria-controls="vista-aportes"><svg class="ic" aria-hidden="true"><use href="#i-aportes"/></svg><span>Plan</span><span id="badge" class="badge" hidden></span></button>
+    <button id="tab-premios" class="tab" type="button" role="tab" data-vista="premios" aria-selected="false" aria-controls="vista-premios"><svg class="ic" aria-hidden="true"><use href="#i-premios"/></svg><span>Beneficios</span></button>
+    <button id="tab-ruta" class="tab tab-ruta" type="button" role="tab" data-vista="ruta" aria-selected="true" aria-controls="vista-ruta"><span class="ruta-circulo" aria-hidden="true"><svg width="32" height="33" focusable="false"><use href="#logo-cimiento"/></svg></span><span class="ruta-txt">Camino</span></button>
+    <button id="tab-juntos" class="tab" type="button" role="tab" data-vista="juntos" aria-selected="false" aria-controls="vista-juntos"><svg class="ic" aria-hidden="true"><use href="#i-casa"/></svg><span>Casa</span><span id="badge-juntos" class="badge" hidden>1</span></button>
+    <button id="tab-cuenta" class="tab" type="button" role="tab" data-vista="cuenta" aria-selected="false" aria-controls="vista-cuenta"><svg class="ic" aria-hidden="true"><use href="#i-cuenta"/></svg><span>Cuenta</span></button>
+  </div>
+</nav>
+
+<!-- Aviso superior (con "Deshacer" de 8 s cuando corresponde) -->
+<div id="toast" class="toast" role="status" aria-live="polite" hidden><span id="toast-txt"></span><button id="toast-accion" class="toast-accion" type="button" hidden>Deshacer</button><i id="toast-tiempo" class="toast-tiempo" aria-hidden="true"></i></div>
+
+<!-- Hoja genérica -->
+<dialog id="hoja" class="hoja" aria-labelledby="hoja-titulo">
+  <div class="hoja-asa" aria-hidden="true"></div>
+  <div class="hoja-cab"><h2 id="hoja-titulo" class="h3"></h2><button id="hoja-cerrar" class="boton-icono" type="button" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-cerrar"/></svg></button></div>
+  <div id="hoja-cuerpo" class="hoja-cuerpo"></div>
+</dialog>
+
+<!-- 4.1 Aportar -->
+<dialog id="aportar" class="hoja" aria-labelledby="t-aportar">
+  <div class="hoja-asa" aria-hidden="true"></div>
+  <form id="form-aporte" novalidate>
+    <div class="hoja-cab"><h2 id="t-aportar" class="h3">Aportar</h2><button class="boton-icono" type="button" data-cerrar="aportar" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-cerrar"/></svg></button></div>
+    <div id="ap-paso1" class="hoja-cuerpo">
+      <label for="monto" class="rotulo">Monto</label>
+      <div class="stepper">
+        <button id="monto-menos" class="paso-btn" type="button" aria-label="Restar $50.000"><svg class="ic" aria-hidden="true"><use href="#i-menos"/></svg></button>
+        <input id="monto" class="stepper-input" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" aria-describedby="err-aporte ap-saldo">
+        <button id="monto-mas" class="paso-btn" type="button" aria-label="Sumar $50.000"><svg class="ic" aria-hidden="true"><use href="#i-mas"/></svg></button>
+      </div>
+      <p id="err-aporte" class="error" hidden></p>
+      <div class="campo campo-select">
+        <select id="origen" aria-describedby="ap-saldo"><option value="cuenta-bci">Cuenta Bci ••1234 (demostración)</option><option value="otra">Ahorro en otra institución (declarado)</option></select>
+        <label for="origen">Desde</label>
+      </div>
+      <p id="ap-saldo" class="ayuda"></p>
+      <button id="ap-otra" class="enlace" type="button">Agregar ahorro de otra institución<svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button>
+      <p id="ayuda-monto" class="aviso aviso-verde" aria-live="polite"></p>
+      <div class="pila">
+        <button id="btn-aportar" class="boton primario" type="submit">Aportar</button>
+        <button class="boton terciario" type="button" data-cerrar="aportar">Cancelar</button>
+      </div>
+    </div>
+    <div id="ap-paso2" class="hoja-cuerpo" hidden>
+      <p class="hoja-nota">Revise antes de confirmar.</p>
+      <dl id="ap-resumen" class="lista-datos"></dl>
+      <div class="pila">
+        <button id="ap-confirmar" class="boton primario" type="button">Confirmar</button>
+        <button id="ap-volver" class="boton terciario" type="button">Volver</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<!-- Menú lateral -->
+<dialog id="menu" class="menu" aria-labelledby="menu-t">
+  <div class="menu-cab"><h2 id="menu-t" class="h3">Menú</h2><button class="boton-icono" type="button" data-cerrar="menu" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-cerrar"/></svg></button></div>
+  <p id="menu-quien" class="ayuda"></p>
+  <ul class="lista-filas">
+    <li><button class="fila" type="button" data-menu="primeros"><span>Primeros pasos</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+    <li><button class="fila" type="button" data-menu="tour"><span>Repetir recorrido</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+    <li><button class="fila" type="button" data-menu="glosario"><span>Glosario y ayuda</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+    <li><button class="fila" type="button" data-menu="acerca"><span>Acerca de este prototipo</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+    <li><button class="fila" type="button" data-menu="persona"><span>Cambiar de persona (demostración)</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+  </ul>
+</dialog>
+
+<!-- 4.3 Premio desbloqueado -->
+<dialog id="premio-modal" class="premio-modal" aria-labelledby="pm-titulo">
+  <div class="pm-halo" aria-hidden="true"><svg class="pm-rayos" viewBox="-100 -100 200 200" width="200" height="200"><g id="pm-rayos-g"></g></svg><span id="pm-medalla" class="pm-medalla"></span></div>
+  <p class="pm-pre">Premio desbloqueado</p>
+  <h2 id="pm-titulo" class="h2"></h2>
+  <p id="pm-txt" class="pm-txt"></p>
+  <p class="pm-nota">Lo logrado es suyo y no se reduce.</p>
+ <div class="pila"><button id="pm-ver" class="boton primario" type="button">Ver mis premios</button><button class="boton terciario" type="button" data-cerrar="premio-modal">Seguir</button></div>
+</dialog>
+
+<!-- 5. Recorrido guiado -->
+<div id="tour" class="tour" hidden>
+  <div class="tour-bloq" data-b="t"></div><div class="tour-bloq" data-b="b"></div><div class="tour-bloq" data-b="l"></div><div class="tour-bloq" data-b="r"></div><div id="tour-bloq-c" class="tour-bloq tour-bloq-c"></div>
+  <div id="tour-foco" class="tour-foco" aria-hidden="true"><span class="tour-baliza"></span></div>
+  <div id="tour-globo" class="tour-globo" role="dialog" aria-modal="true" aria-labelledby="tour-titulo" aria-describedby="tour-texto">
+    <div class="tour-sup"><span id="tour-paso" class="tour-paso"></span><span id="tour-puntos" class="tour-puntos" aria-hidden="true"></span></div>
+    <h2 id="tour-titulo" class="tour-titulo"></h2>
+    <p id="tour-texto" class="tour-texto" aria-live="polite"></p>
+    <div class="tour-botones"><button id="tour-omitir" class="enlace" type="button">Omitir recorrido</button><span class="tour-der"><button id="tour-atras" class="enlace tour-atras" type="button">Atrás</button><button id="tour-sig" class="boton primario chico" type="button">Siguiente</button></span></div>
+  </div>
+</div>
+
+<!-- Sugerencia de primer uso (una por pantalla) -->
+<div id="tip" class="tip" role="status" hidden><span id="tip-txt"></span><button id="tip-ok" class="enlace" type="button">Entendido</button></div>
+
+<!-- 7.1 Sesión bloqueada -->
+<div id="bloqueo" class="bloqueo" role="dialog" aria-modal="true" aria-labelledby="bl-titulo" hidden>
+  <svg width="64" height="66" aria-hidden="true" focusable="false"><use href="#logo-cimiento"/></svg>
+  <h2 id="bl-titulo" class="h2">Sesión bloqueada</h2>
+  <p id="bl-txt">Ingrese su PIN para continuar. Sus montos quedan ocultos mientras tanto.</p>
+  <div id="bl-pin-zona" class="campo"><input id="pin-in" type="password" inputmode="numeric" maxlength="4" autocomplete="off" enterkeyhint="go" placeholder=" " aria-describedby="pin-err"><label for="pin-in">PIN de 4 dígitos</label></div>
+  <p id="pin-err" class="error" hidden></p>
+  <button id="pin-ok" class="boton primario" type="button">Desbloquear</button>
+  <button id="pin-salir" class="enlace" type="button">Cerrar sesión</button>
+</div>
+
+<div id="confeti" class="confeti" aria-hidden="true"></div>
+<p id="anuncio" class="solo-lector" aria-live="polite"></p>
+
+<!-- Firebase solo se descarga si js/config.js trae una configuración (ver app.js: cargarServidor). -->
+<script src="js/config.js"></script>
+<script src="js/viaje.js"></script>
+<script src="js/datos-bci.js"></script>
+<script src="js/store.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+/* Tokens de Cimiento, generados desde el sistema de diseño (valores del Kit de Bci). */
+:root{
+  --fondo: #F6F7F8;
+  --superficie: #FFFFFF;
+  --borde: #E2E8EA;
+  --borde-control: #708590;
+  --texto: #37474F;
+  --texto-secundario: #546E7A;
+  --tinta: #2C3A41;
+  --azul-bci: #2772CC;
+  --azul-profundo: #1D5699;
+  --azul-suave: #D4E3F5;
+  --verde-bci: #28892B;
+  --verde-oscuro: #28652B;
+  --verde-suave: #D4E7D5;
+  --amarillo-bci: #FFE300;
+  --amarillo-texto: #6B5D00;
+  --amarillo-suave: #FFF9CC;
+  --rojo-bci: #ED0C19;
+  --rojo-texto: #C4000F;
+  --sobre-azul: #FFFFFF;
+  --espacio-1: 4px;
+  --espacio-2: 8px;
+  --espacio-3: 12px;
+  --espacio-4: 16px;
+  --espacio-6: 24px;
+  --espacio-8: 32px;
+  --area-toque: 44px;
+  --radio-sm: 3px;
+  --radio-md: 6px;
+  --radio-lg: 12px;
+  --radio-pleno: 9999px;
+  --sombra-normal: 0px 2px 8px rgba(55, 71, 79, 0.2);
+  --sombra-pequena: 0px 1px 4px rgba(55, 71, 79, 0.25);
+  --font-sans: 'Overpass', Arial, sans-serif;
+  /* Añadidos en la ronda 12 (faltaban en el kit cargado; valores de la guía visual de Bci) */
+  --gris-claro: #BBC5CA;
+  --gris-medio: #78909C;
+  --radio-tarjeta: 16px;
+  /* Ronda 13: tarjeta estilo Bci, fondo degradado y apoyos (valores de la guía) */
+  --sombra-tarjeta: 0 1px 2px rgba(44, 58, 65, 0.05), 0 4px 14px rgba(29, 86, 153, 0.09);
+  --separador: #E7ECF0;
+  --fondo-fila: #F1F6FC;
+  --azul-banda: rgba(39, 114, 204, 0.18);
+  /* Ronda 16: degradado invertido (blanco arriba, azul claro abajo, fijo al viewport) y apoyos del slider y los carriles */
+  --fondo-degradado: linear-gradient(180deg, #FFFFFF 0, #F4F8FC 240px, #DFEAF8 520px, #C7DBF3 100%);
+  --riel: #C9DCF2;
+  --carril-sel: #EAF1FA;
+  --capa-tour: rgba(20, 35, 50, 0.62);
+}
