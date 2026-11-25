@@ -100,6 +100,7 @@
 
       <div class="entrada-alt">
         <button id="btn-demo" class="boton secundario" type="button">Probar con el caso de ejemplo</button>
+        <button id="btn-que" class="enlace" type="button" aria-haspopup="dialog">¿Qué es Cimiento?</button>
         <button id="btn-tengo-codigo" class="enlace" type="button" aria-expanded="false" aria-controls="form-codigo">Tengo un código compartido</button>
         <form id="form-codigo" class="tarjeta form-codigo" autocomplete="off" hidden>
           <div class="campo">
@@ -170,6 +171,7 @@
           </button>
           <button id="r-aportar" class="boton primario" type="button" aria-haspopup="dialog">Aportar</button>
         </div>
+        <p id="r-inicial" class="heroe-inicial" hidden></p>
       </div>
       </div>
       <div class="aviso-zona"><button id="r-aviso" class="pildora-aviso" type="button" hidden></button>
@@ -264,7 +266,10 @@
       <h2 class="rotulo">Ayuda</h2>
       <ul class="lista-filas">
         <li><button id="c-tour" class="fila" type="button"><span>Repetir recorrido</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
-        <li hidden><button id="c-primeros" class="fila" type="button"><span>Primeros pasos</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li id="c-demo-li" hidden><button id="c-primeros" class="fila" type="button"><span>Qué probar</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li id="c-volver-li" hidden><button id="c-volver" class="fila" type="button"><span>Volver al caso de ejemplo</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li id="c-persona-li" hidden><button id="c-persona" class="fila" type="button"><span>Cambiar de persona (Tomás o Paula)</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+        <li><button id="c-que" class="fila" type="button"><span>¿Qué es Cimiento?</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
         <li><button id="c-glosario" class="fila" type="button"><span>Glosario y ayuda</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
         <li><button id="c-acerca" class="fila" type="button"><span>Acerca de este prototipo</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
       </ul>
@@ -360,6 +365,7 @@
         <button id="monto-mas" class="paso-btn" type="button" aria-label="Sumar $50.000"><svg class="ic" aria-hidden="true"><use href="#i-mas"/></svg></button>
       </div>
       <p id="err-aporte" class="error" hidden></p>
+      <button id="ap-completar" class="ap-completar" type="button" hidden></button>
       <div class="campo campo-select">
         <select id="origen" aria-describedby="ap-saldo"><option value="cuenta-bci">Cuenta Bci ••1234 (demostración)</option><option value="otra">Ahorro en otra institución (declarado)</option></select>
         <label for="origen">Desde</label>
@@ -388,7 +394,7 @@
   <div class="menu-cab"><h2 id="menu-t" class="h3">Menú</h2><button class="boton-icono" type="button" data-cerrar="menu" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-cerrar"/></svg></button></div>
   <p id="menu-quien" class="ayuda"></p>
   <ul class="lista-filas">
-    <li><button class="fila" type="button" data-menu="primeros"><span>Primeros pasos</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
+    <li><button class="fila" type="button" data-menu="primeros"><span>Qué probar</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
     <li><button class="fila" type="button" data-menu="tour"><span>Repetir recorrido</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
     <li><button class="fila" type="button" data-menu="glosario"><span>Glosario y ayuda</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>
     <li><button class="fila" type="button" data-menu="acerca"><span>Acerca de este prototipo</span><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button></li>

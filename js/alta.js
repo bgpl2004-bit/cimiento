@@ -52,7 +52,7 @@
        return '<li style="--k:' + k + '"><span class="ok" aria-hidden="true"><svg class="ic"><use href="#i-check"/></svg></span><span><strong>' + r[0] + "</strong><small>" + r[1] + '</small></span><span class="monto">' + r[2] + "</span></li>";
       }).join("") + '</ul><span class="etiqueta-demo">' + BCI.ETIQUETA + "</span>" +
     '<h2 class="rotulo">Usaremos</h2><ul class="usaremos"><li>Su ingreso y su ahorro, para sugerir un camino.</li><li>Sus aportes desde la cuenta, para verificarlos.</li><li>Nunca su clave ni sus movimientos.</li></ul>' +
-    '<label class="check"><input id="alta-consent" type="checkbox"' + (alta.consent ? " checked" : "") + '><span>Autorizo a Cimiento a usar estos datos Bci</span></label>' +
+    '<label class="check"><input id="alta-consent" type="checkbox"' + (alta.consent ? " checked" : "") + '><span>Autorizo a Bci a usar estos datos en Cimiento</span></label>' +
     '<p class="ayuda">Puede revocarlo en Mi cuenta · Mis datos y consentimientos.</p>';
     } else if (p === 2) {
       if (alta.sugerir && alta.consent && !alta.ingreso) alta.ingreso = B.ingreso;

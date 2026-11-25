@@ -1,8 +1,8 @@
 /* Cimiento: service worker para usar la app sin conexión (prototipo, sin compilación).
  * Red primero y caché como respaldo: con conexión siempre se ven los últimos cambios; sin conexión, la última copia. */
-var CACHE = "cimiento-v21-2";
+var CACHE = "cimiento-v22";
 var ARCHIVOS = ["./", "index.html", "test.html", "manifest.webmanifest", "css/tokens.css", "css/app.css",
-  "js/config.js", "js/viaje.js", "js/datos-bci.js", "js/store.js", "js/app.js", "js/alta.js", "js/plan.js", "js/protocolo.js", "assets/vendor/qrcode.js",
+  "js/config.js", "js/viaje.js", "js/datos-bci.js", "js/store.js", "js/app.js", "js/alta.js", "js/plan.js", "js/hojas.js", "js/protocolo.js", "assets/vendor/qrcode.js",
   "assets/logo_bci_negro.svg", "assets/logo-cimiento.svg", "assets/fonts/overpass-latin-variable.woff2",
   "assets/icons/favicon.svg", "assets/icons/apple-touch-icon.png", "assets/icons/icono-192.png", "assets/icons/icono-512.png", "assets/icons/icono-maskable-512.png"];
 

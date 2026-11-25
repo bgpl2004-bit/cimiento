@@ -130,7 +130,7 @@
    if (cambia && !op.sinScroll) window.scrollTo(0, 0);
    if (v === "premios") { marcarPaso("premios"); ev("premios"); tourAccion("premios"); renderPremios(true); }
    if (v === "juntos") { ev("juntos"); tourAccion("juntos"); renderJuntos(); }
-   if (v === "aportes") { ev("plan"); tourAccion("plan"); cargarPlan(); }
+   if (v === "aportes") { ev("plan"); tourAccion("plan"); marcarPaso("plan"); cargarPlan(); }
    if (v === "ruta" && cambia && estado && estado.config) renderRuta();
    if (cambia) setTimeout(function () { mostrarTip(v); }, 400);
   }
@@ -169,6 +169,7 @@
    return { d: { casitas: cas, actual: act, inicial: "", pie: cfg().pie, puestas: cas.filter(function (x) { return x.estado === "acunada"; }).length, premios: pr, parte: cfg().pie, verificado: j.total,
     juntos: { p1: A, p2: B, ini: [inicial("p1"), inicial("p2")] } }, v: v, j: j };
   }
+  var UMBRAL_ETAPA = 0.5, ETAPA_FALTA = /[?&]etapa=falta\b/.test(location.search);
   function renderRuta() {
    var dm = datosMapa(), v = dm.v, d = dm.d, W = ancho(), libres = modoRuta === "ajuste" ? V.libresAjuste(v) : [], prop = propuestaActiva();
    var num = $("r-cifra"), meta = $("r-cifra-meta");
@@ -178,17 +179,20 @@
     meta.textContent = "Propuesta" + SEP + plazo(sim.mesesDespues); num.textContent = m$(prop.plan) + " al mes";
    } else if (v.actual < 0) { meta.textContent = v.acunadas + " de 10 casitas"; num.textContent = "Parte lograda"; }
    else {
-    var nuevo = v.faltaCasita;
-    if (ultimaFalta !== null && ultimaFalta !== nuevo && !ocultos() && !quieto()) contar(num, ultimaFalta, nuevo, 600, function (x) { return pesos(x); });
+    var xc = v.casitas[v.actual], llevan = !ETAPA_FALTA && xc.lleno > 0 && xc.lleno < UMBRAL_ETAPA, nuevo = llevan ? Math.round(xc.lleno * xc.monto) : v.faltaCasita, clave = (llevan ? "l" : "f") + v.actual;
+    if (ultimaFalta !== null && ultimaFalta.k === clave && ultimaFalta.n !== nuevo && !ocultos() && !quieto()) contar(num, ultimaFalta.n, nuevo, 600, function (x) { return pesos(x); });
     else num.textContent = m$(nuevo);
-    ultimaFalta = nuevo; meta.textContent = "Falta para esta casita";
+    ultimaFalta = { k: clave, n: nuevo }; meta.textContent = llevan ? "Llevan en la casita " + (v.actual + 1) + SEP + "de " + m$(xc.monto) : "Faltan para la casita " + (v.actual + 1);
    }
    $("r-heroe-et").textContent = v.actual >= 0 ? "Casita " + (v.actual + 1) + SEP + matNombre(v.actual + 1) : "Su parte del pie";
    $("r-cifra-btn").setAttribute("aria-label", meta.textContent + ": " + num.textContent + ". Ver detalle de mi viaje");
+   var ini = visibles().filter(function (a) { return a.de === quien && a.origen === "inicial" && a.estado === "verificado"; }).reduce(function (t, a) { return t + a.monto; }, 0), nI = 0, acI = 0;
+   v.casitas.forEach(function (x) { acI += x.monto; if (acI <= ini + 0.5) nI++; });
+   $("r-inicial").hidden = !(ini > 0 && nI > 0 && modoRuta !== "ajuste");
+   $("r-inicial").textContent = "Su ahorro en Bci (" + m$(ini) + ") ya cuenta: completó " + nI + (nI === 1 ? " casita." : " casitas.");
    $("r-avatar").textContent = inicial(quien); $("r-avatar").className = "avatar av-" + quien;
    var dos = V.hayDos(cfg()), o = otro(quien), vo = dos ? vj(o) : null;
    pintarOjo(); renderAviso(v, prop);
-   // Ronda 21: el camino dice todo con lo visual (marca de ajuste, estado del mes, planes futuros y un marcador discreto de la pareja).
    var aj = ultimoAjuste(), plan = per(quien).plan || 0;
    var mes = visibles().filter(function (a) { return a.de === quien && a.origen !== "inicial" && mesClave(new Date(a.fecha)) === mesClave(); }).reduce(function (t, a) { return t + a.monto; }, 0);
    var cam = V.dibujarCamino(modoRuta, d, { ancho: W, ajuste: libres, pie: cfg().pie, marca: aj && v.actual >= 0 ? { i: v.actual, txt: "Ajuste del " + fechaCorta(aj.t) } : null,
@@ -203,9 +207,9 @@
    if (modoRuta === "ajuste" && prop) {
     $("aj-fila").textContent = "Aporte mensual " + m$(prop.antes) + " → " + m$(prop.plan);
     $("aj-titulo").textContent = prop.tipo === "mas" ? "Propuesta: llegar antes" : "Propuesta para su camino";
+    var ajt = document.querySelector(".aj-txt").firstChild; if (ajt && ajt.nodeType === 3) ajt.nodeValue = prop.tipo === "mas" ? "Las casitas logradas se mantienen. Cambian solo las que faltan. " : "Este mes no hubo aporte. Las casitas logradas se mantienen y el camino se puede ajustar cuando quieran. ";
    }
   }
-  // Planes futuros (Plan): cada gasto se ubica en la casita que tocaría ese mes y alarga ese tramo.
   function pausasPlan(v) {
    var P = per(quien), plan = P.plan || 0, hoy = new Date(); if (!plan || v.actual < 0) return [];
    return (P.planes || []).map(function (g, k) {
@@ -224,7 +228,7 @@
    if (modoRuta === "ajuste") { b.hidden = true; return; }
    if (sol) { html = '<span class="punto"></span>' + esc(textoSolicitud(sol)); accion = "solicitud"; }
    else if (prop) { b.hidden = true; return; }
-   else if (reciente) { cls += " verde"; html = '<span class="punto"></span>Casita ' + reciente.n + " lograda" + SEP + "verificada por Bci"; accion = "ficha:" + reciente.i; }
+   else if (reciente) { cls += " verde"; html = '<span class="punto"></span>Casita ' + reciente.n + " lograda. Verificada por Bci."; accion = "ficha:" + reciente.i; }
    b.hidden = !html; b.className = cls; b.setAttribute("data-accion", accion);
    b.innerHTML = html + (html ? '<svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg>' : "");
   }
@@ -482,7 +486,7 @@
    '<div><p class="ficha-t">Casita ' + n + SEP + matNombre(n) + '</p><p class="ficha-s">' + mM(x.monto) + SEP + "pieza " + n + " de 10" + (mio ? "" : SEP + esc(nombre(p))) + "</p></div></div>";
    if (x.estado === "acunada") {
     html += '<div class="ficha-estado"><span class="chip ok"><svg class="ic" style="width:14px;height:14px" aria-hidden="true"><use href="#i-check"/></svg>Verificada por Bci</span></div>' +
-   (x.fecha ? '<p class="hoja-nota">Lograda el ' + fechaLarga(x.fecha) + ". Se mantiene aunque ajuste su camino.</p>" : "") +
+   (x.fecha ? '<p class="hoja-nota">Lograda el ' + fechaLarga(x.fecha) + ". Se mantiene aunque ajuste su camino.</p>" : "") + reconHtml(x.n) +
    '<div class="pila acciones-ficha"><button class="boton secundario" type="button" data-ficha="detalle" data-i="' + i + '" data-p="' + p + '">Ver detalle</button>' +
    (mio ? '<button class="boton secundario" type="button" data-ficha="rescatar" data-i="' + i + '">Rescatar</button>' + (V.hayDos(cfg()) ? '<button class="boton secundario" type="button" data-ficha="transferir" data-i="' + i + '">Transferir</button>' : "") : "") + "</div>";
    } else if (x.estado === "en-curso") {
@@ -493,7 +497,7 @@
     html += '<div class="ficha-estado"><span class="chip gris">Por venir</span></div><p class="hoja-nota">Se empieza al terminar la casita ' + (n - 1) + ". Si algo cambia, su tamaño puede cambiar. Las casitas logradas se mantienen.</p>";
    } else html += '<div class="ficha-estado"><span class="chip gris">' + (x.estado === "rescatada" ? "Rescatada" : "Transferida") + "</span></div>";
    html += '<p class="rotulo-pie">' + ROTULO + "</p>";
-   abrirHoja("Casita " + n, html); ev("ficha");
+   abrirHoja("Casita " + n, html); ev("ficha"); marcarPaso("ficha");
   }
   function abrirDetalleCasita(p, i) {
    var x = vj(p).casitas[i]; if (!x) return;
@@ -589,8 +593,11 @@
   });
 
   /* === Aportar (4.1) === */
+  var SALDO_DEMO = { p1: 5000000, p2: 3000000 };
+  function esDemo() { return !!(api && /^demo/.test(api.codigo)); }
+  function montoCompletar() { var v = vj(); if (v.actual < 0) return 0; var m = Math.ceil(v.faltaCasita / 500000) * 500000, s = saldoDisponible(); return s >= v.faltaCasita ? Math.min(m, s) : 0; }
   function saldoDisponible() {
-   var base = BCI.persona(quien).saldo, usado = visibles().filter(function (a) { return a.de === quien && a.origen === "cuenta-bci" && a.estado === "verificado" && mesClave(new Date(a.fecha)) === mesClave(); }).reduce(function (s, a) { return s + a.monto; }, 0);
+   var base = Math.max(BCI.persona(quien).saldo, esDemo() ? SALDO_DEMO[quien] || 0 : 0), usado = visibles().filter(function (a) { return a.de === quien && a.origen === "cuenta-bci" && a.estado === "verificado" && mesClave(new Date(a.fecha)) === mesClave(); }).reduce(function (s, a) { return s + a.monto; }, 0);
    return Math.max(0, base - usado);
   }
   function montoAportar() { return digitos($("monto").value); }
@@ -605,6 +612,8 @@
    $("btn-aportar").textContent = (origen === "otra" ? "Declarar " : "Aportar ") + (m ? pesos(m) : "");
    $("ap-saldo").textContent = origen === "otra" ? "Ahorro en otra institución: usted lo declara y Bci aún no lo comprueba." : "Saldo disponible: " + m$(saldo) + SEP + "Dato Bci (demostración)";
    $("ap-otra").hidden = origen === "otra";
+   var vC = vj(), mc = origen === "otra" ? 0 : montoCompletar(), bc = $("ap-completar"); bc.hidden = !mc || m === mc;
+   if (mc) bc.innerHTML = "<strong>Completar la casita " + (vC.actual + 1) + "</strong><span>" + m$(mc) + "</span>";
    if (origen === "otra") { ay.className = "aviso aviso-amarillo"; ay.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-alerta"/></svg><span>Queda declarado: cuenta para su casa, pero no activa premios hasta que Bci lo verifique.</span>'; }
    else {
     ay.className = "aviso aviso-verde";
@@ -622,6 +631,7 @@
   on("monto-menos", "click", function () { $("monto").value = pesos(Math.max(0, montoAportar() - 50000)); errorMonto(null); pintarAportar(); });
   on("monto-mas", "click", function () { $("monto").value = pesos(Math.min(50000000, montoAportar() + 50000)); errorMonto(null); pintarAportar(); });
   on("origen", "change", function () { errorMonto(null); pintarAportar(); });
+  on("ap-completar", "click", function () { $("monto").value = pesos(montoCompletar()); errorMonto(null); pintarAportar(); ev("aportar_completar"); $("monto").focus(); });
   on("ap-otra", "click", function () { $("origen").value = "otra"; pintarAportar(); $("origen").focus(); });
   on("btn-mas", "click", function () { abrirAportar(); });
   function validarAporte() {
@@ -657,9 +667,9 @@
     ev("aporte"); marcarPaso("aporte");
     if (ver) chispa(desde);
     vibrar(12);
-    toast((ver ? "Aporte verificado: " : "Ahorro declarado: ") + pesos(m) + ".", { accion: "Deshacer", fn: function () { deshacerAporte(a.id); } });
-    anunciar((ver ? "Aporte verificado de " : "Ahorro declarado de ") + pesos(m) + ".");
     var logro = celebrarPend; celebrarPend = null;
+    if (!logro) toast((ver ? "Aporte verificado: " : "Ahorro declarado: ") + pesos(m) + ".", { accion: "Deshacer", fn: function () { deshacerAporte(a.id); } });
+    anunciar((ver ? "Aporte verificado de " : "Ahorro declarado de ") + pesos(m) + ".");
     setTimeout(function () {
     if (logro) celebrarLogro(logro, a); else luego(function () { abrirComprobante(a.id); });
     tourAccion("aporte");
@@ -720,13 +730,16 @@
    var x = vj().casitas[i];
    transitorio = { num: "Casita " + x.n + " lograda", meta: "Siguiente: " + (x.n < 10 ? x.n + 1 : "meta"), hasta: Date.now() + 4500 };
    renderRuta(); setTimeout(function () { transitorio = null; if (estado && estado.config) renderRuta(); }, 4600);
-   anunciar("Casita " + x.n + " lograda y verificada por Bci.");
+   anunciar("Casita " + x.n + " lograda. Verificada por Bci.");
    setTimeout(function () { luego(function () { abrirAcunado(i, lg.premio, aporte); }); }, quieto() ? 0 : 1000);
   }
+  function reconHtml(n) { return '<p class="recon"><svg class="ic" aria-hidden="true"><use href="#i-premios"/></svg>' + (n <= 3 ? "Sello de la casita en su ficha" : n <= 6 ? "Registro de la casita en su informe de avance" : n <= 8 ? "Reconocimiento del ejecutivo en su próxima visita (idea para Bci)" : "Acceso a una asesoría de 15 minutos con un ejecutivo (idea para Bci)") + '</p><p class="rotulo-prop">Propuesta de Cimiento. Bci define si lo ofrece.</p>'; }
   function abrirAcunado(i, premio, aporte) {
-   var v = vj(), x = v.casitas[i], pr = V.premios(cfg(), estado.aportes, quien), prox = pr.filter(function (p) { return p.estado === "proximo"; })[0];
+   var v = vj(), x = v.casitas[i], sigX = v.casitas[i + 1], pr = V.premios(cfg(), estado.aportes, quien), prox = pr.filter(function (p) { return p.estado === "proximo"; })[0];
    abrirHoja("Casita " + x.n + " puesta", '<div class="ficha-cab"><span class="ficha-casita" style="--mat:' + matColor(x.n) + '">' + V.casita("lograda", 1, 46) + "</span>" +
-   '<div><p class="ficha-t">Verificada por Bci</p><p class="ficha-s">' + mM(x.monto) + SEP + matNombre(x.n) + "</p></div></div>" +
+   '<div><p class="ficha-t">Casita ' + x.n + ' lograda. Verificada por Bci.</p><p class="ficha-s">' + mM(x.monto) + SEP + matNombre(x.n) + "</p></div></div>" +
+   (premio ? '<p class="premio-desb"><span aria-hidden="true">' + esc(premio.corto) + "</span>Premio desbloqueado: " + esc(premio.titulo.toLowerCase()) + "</p>" : "") + reconHtml(x.n) +
+   (sigX && sigX.lleno > 0 ? '<p class="sig-iniciada"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Casita ' + sigX.n + " ya empezó" + SEP + "lleva " + pct(sigX.lleno) + "</p>" : "") +
    (prox ? '<p class="fila-amarilla"><strong>Próximo premio: ' + esc(prox.corto === "1.ª" ? "primera casita" : prox.corto + " del pie") + "</strong><span>Falta para este premio: " + m$(prox.falta) + "</span></p>" : "") +
    '<div class="pila"><button class="boton primario" type="button" data-cerrar="hoja">Seguir</button>' + (aporte ? '<button class="boton terciario" type="button" data-comprobante="' + esc(aporte.id) + '">Ver comprobante</button>' : "") + "</div>");
    if (premio) cola.push(function () { abrirPremioDesbloqueado(premio); });
@@ -734,7 +747,7 @@
   on("hoja-cuerpo", "click", function (e) { var b = e.target.closest("[data-comprobante]"); if (b) abrirComprobante(b.getAttribute("data-comprobante")); });
   function abrirPremioDesbloqueado(p) {
    var g = ""; for (var k = 0; k < 12; k++) g += '<polygon points="-6,-58 6,-58 0,-96" fill="' + (k % 2 ? "#FFF3A6" : "#D4E7D5") + '" transform="rotate(' + k * 30 + ')"/>';
-   $("pm-rayos-g").innerHTML = g; $("pm-medalla").textContent = p.corto; $("pm-titulo").textContent = p.titulo; $("pm-txt").textContent = p.txt;
+   $("pm-rayos-g").innerHTML = g; $("pm-medalla").textContent = p.corto; $("pm-titulo").textContent = p.titulo; $("pm-txt").textContent = p.txt + " Propuesta de Cimiento. Bci define si lo ofrece.";
    abrirDialogo($("premio-modal")); setTimeout(function () { confeti(28); }, 300);
    vibrar([12, 60, 12]);
    anunciar("Premio desbloqueado: " + p.titulo + ".");
@@ -743,7 +756,6 @@
 
   /* === Aportes (4.2) === */
   function tituloAporte(a) { return a.origen === "cuenta-bci" ? "Aporte desde Cuenta Bci" : a.origen === "otra" ? "Ahorro en otra institución" : a.origen === "inicial" ? "Ahorro inicial" : a.origen === "rescate" ? "Rescate de casita " + (a.casita || "") : "Transferencia de casita " + (a.casita || ""); }
-  // Ronda 21: constancia en Beneficios (aporte automático y recordatorio, simulados); el registro vive en Casa.
   function renderAuto() {
    var A = pref("auto:" + clavePersona()), au = A ? JSON.parse(A) : { on: false, monto: per(quien).plan || 0 };
    $("ap-auto").innerHTML = '<label class="sw-fila"><span><strong>Aporte automático</strong><small>Simulado: no mueve dinero real.</small></span><input id="ap-auto-on" type="checkbox" role="switch"' + (au.on ? " checked" : "") + "></label>" +
@@ -819,16 +831,19 @@
    }).join("");
    var dz = $("pr-decl"); dz.hidden = !(v.declarado > 0);
    dz.innerHTML = v.declarado > 0 ? '<svg class="ic" aria-hidden="true"><use href="#i-alerta"/></svg><span>' + m$(v.declarado) + ' declarado: verifíquelo para que cuente.</span><button class="enlace" type="button" data-pr="declarados">Ver<svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button>' : "";
-   var k2 = V.constancia(estado.aportes, null, quien);
-   $("pr-constancia").innerHTML = '<p class="rotulo" style="margin-top:0">Constancia' + SEP + k2.meses + (k2.meses === 1 ? " mes seguido" : " meses seguidos") + " con aporte verificado</p>" +
+   var k2 = V.constancia(estado.aportes, null, quien), NIV = [["Bronce", 3, "Insignia de constancia en su perfil"], ["Plata", 6, "Su constancia queda en su perfil Bci y puede presentarla al pedir su crédito"], ["Oro", 12, "Asesoría con un ejecutivo"]];
+   var sig = NIV.filter(function (x) { return k2.max < x[1]; })[0];
+   $("pr-constancia").innerHTML = '<div class="nivel"><span class="nv-ins nv-' + (k2.nivel || "sin").toLowerCase() + '" aria-hidden="true">' + (k2.nivel ? k2.nivel.charAt(0) : "") + '</span><div><p class="nv-t">' + (k2.nivel ? "Nivel " + k2.nivel : "Aún sin nivel") + '</p><p class="nv-s tabular">' + k2.meses + (k2.meses === 1 ? " mes seguido" : " meses seguidos") + (sig ? SEP + sig[0] + ": faltan " + (sig[1] - k2.meses) + " meses" : "") + "</p></div></div>" +
+   (k2.meses === 0 && k2.nivel ? '<p class="hoja-nota">Su racha vuelve a cero. Su nivel ' + k2.nivel + " se mantiene.</p>" : "") +
+   '<ul class="niveles">' + NIV.map(function (x) { var ok = k2.max >= x[1]; return '<li class="' + (ok ? "ok" : "") + '"><strong>' + x[0] + "</strong> " + x[1] + " meses" + SEP + x[2] + (ok ? ' <span class="chip ok">Logrado</span>' : "") + "</li>"; }).join("") + '</ul><p class="rotulo-prop">Propuesta de Cimiento. Bci define si lo ofrece.</p>' +
    '<div class="meses-c">' + k2.ultimos.map(function (m) { return '<span class="mes-c' + (m.ok ? " ok" : "") + (m.actual ? " actual" : "") + (m.futuro ? " futuro" : "") + '" role="img" aria-label="' + esc(m.aria) + '"><i aria-hidden="true">' + (m.ok ? '<svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>' : "") + '</i><span aria-hidden="true">' + esc(m.et) + "</span></span>"; }).join("") + "</div>" +
-   '<p class="ayuda">Mejor tasa en los meses con aporte verificado. Retomen cuando quieran: las casitas logradas se mantienen.</p>';
+   '<p class="ayuda">Retomen cuando quieran: las casitas logradas se mantienen.</p>';
   }
   on("vista-premios", "click", function (e) {
    var b = e.target.closest("[data-pr]"); if (!b) return; var q = b.getAttribute("data-pr"); ev("premio_" + q);
    if (q === "aportar") abrirAportar(parseInt(b.getAttribute("data-m"), 10) || 0);
-   else if (q === "declarados") { histFiltro = "declarados"; irA("aportes"); document.querySelectorAll(".chip-filtro").forEach(function (x) { x.setAttribute("aria-pressed", x.getAttribute("data-filtro") === "declarados" ? "true" : "false"); }); renderAportes(); }
-   else if (q === "usar") { var p = V.premios(cfg(), estado.aportes, quien).filter(function (x) { return x.id === b.getAttribute("data-id"); })[0]; if (p) abrirHoja(p.titulo, '<p class="hoja-nota">' + esc(p.txt) + '</p><div class="fila-datos"><span>Qué necesita</span><strong>Mantener sus casitas verificadas</strong></div><div class="fila-datos"><span>Cuándo se usaría</span><strong>Al pedir su crédito</strong></div><p class="fuente">Concepto 2050 simulado. No es una oferta de Bci: el banco decide.</p>'); }
+   else if (q === "declarados") { histFiltro = "declarados"; irA("juntos"); document.querySelectorAll(".chip-filtro").forEach(function (x) { x.setAttribute("aria-pressed", x.getAttribute("data-filtro") === "declarados" ? "true" : "false"); }); renderAportes(); }
+   else if (q === "usar") { var p = V.premios(cfg(), estado.aportes, quien).filter(function (x) { return x.id === b.getAttribute("data-id"); })[0]; if (p) abrirHoja(p.titulo, '<p class="hoja-nota">' + esc(p.txt) + '</p><div class="fila-datos"><span>Qué necesita</span><strong>Mantener sus casitas verificadas</strong></div><div class="fila-datos"><span>Cuándo se usaría</span><strong>Al pedir su crédito</strong></div><p class="rotulo-prop">Propuesta de Cimiento. Bci define si lo ofrece.</p><p class="fuente">Concepto 2050 · simulado, no es una oferta de Bci.</p>'); }
   });
   /* === Simular un cambio (4.4): hoja, no pestaña === */
   function abrirSimular() {
@@ -889,6 +904,7 @@
 
   /* === Mi cuenta (4.5) === */
   function renderCuenta() {
+   ["c-demo-li", "c-volver-li", "c-persona-li"].forEach(function (id) { $(id).hidden = !esDemo(); });
    $("c-perfil-txt").textContent = nombre(quien) + SEP + "código " + (api ? api.codigo : "");
    $("c-pin-estado").textContent = pref("pin") ? "Activado" : "Desactivado";
    $("c-ocultar").checked = ocultos(); $("a-movimiento").checked = pref("movimiento") === "1";
@@ -958,19 +974,17 @@
    if (a !== c) { msg.textContent = "Los PIN no coinciden."; msg.hidden = false; $("pin2").focus(); return; }
    hashPin(a).then(function (h) { pref("pin", h); ultimaActividad = Date.now(); cerrarDialogo("hoja"); renderCuenta(); toast("PIN activado en este teléfono."); });
   });
-  on("c-datos", "click", function () {
-   var P = per(quien), ok = !!P.consentimientoBci;
-   abrirHoja("Mis datos y consentimientos", '<div class="fila-datos"><span>Uso de datos Bci (demostración)</span><strong>' + (ok ? "Autorizado" : "Revocado") + "</strong></div>" +
-   '<p class="hoja-nota">' + (ok ? "Cimiento usa su ingreso y su ahorro en Bci para sugerir un camino, y sus aportes desde la cuenta para verificarlos." : "Sin autorización, Cimiento no sugiere valores con sus datos Bci; puede escribirlos usted.") + "</p>" +
-   '<div class="pila"><button class="boton secundario" type="button" data-consent="' + (ok ? "revocar" : "otorgar") + '">' + (ok ? "Revocar autorización" : "Autorizar de nuevo") + "</button>" +
-   '<button class="boton secundario" type="button" data-consent="descargar">Descargar mis datos (JSON)</button></div>' +
-   '<p class="hoja-nota">Cimiento nunca ve ni guarda su clave. En este prototipo los datos quedan en este teléfono.</p><p class="nota">Derechos de acceso, rectificación, supresión y portabilidad: Ley 21.719, en vigencia desde el 1 de diciembre de 2026 salvo que se publique su postergación.</p>');
+  on("c-datos", "click", function () { var P = per(quien); marcarPaso("datos"); conHojas(function (H) { abrirHoja("Mis datos y consentimientos", H.datos(P)); }); });
+  on("hoja-cuerpo", "change", function (e) {
+   if (e.target.id !== "cons-credito") return;
+   var c = clonarCfg(); c.personas[quien].consentimientoCredito = e.target.checked ? new Date().toISOString() : null; ev(e.target.checked ? "cons_credito_si" : "cons_credito_no");
+   guardar(c, e.target.checked ? "Autorización para crédito otorgada." : "Autorización para crédito retirada.");
   });
   on("hoja-cuerpo", "click", function (e) {
    var b = e.target.closest("[data-consent]"); if (!b) return;
    var q = b.getAttribute("data-consent");
    if (q === "descargar") {
-    var P = per(quien), datos = { nombre: P.nombre, codigo: api.codigo, situacion: { ingreso: P.ingreso, gastos: P.gastos, capacidad: P.capacidad, plan: P.plan }, parte: P.parte, forma: P.forma, consentimientoBci: P.consentimientoBci || null, casitas: P.casitas,
+    var P = per(quien), datos = { nombre: P.nombre, codigo: api.codigo, situacion: { ingreso: P.ingreso, gastos: P.gastos, capacidad: P.capacidad, plan: P.plan }, parte: P.parte, forma: P.forma, consentimientoBci: P.consentimientoBci || null, consentimientoCredito: P.consentimientoCredito || null, casitas: P.casitas,
     aportes: visibles().filter(function (a) { return a.de === quien; }).map(function (a) { return { fecha: a.fecha, monto: a.monto, estado: a.estado, origen: a.origen }; }), nota: "Prototipo académico. Datos de demostración." };
     descargar("cimiento-mis-datos.json", "application/json", JSON.stringify(datos, null, 2)); toast("Datos descargados."); return;
    }
@@ -993,21 +1007,16 @@
    if (t.hasAttribute("data-pref")) pref(t.getAttribute("data-pref"), t.checked ? "1" : "0");
    if (t.hasAttribute("data-acc")) { var k = t.getAttribute("data-acc"); pref(k, k === "tam" ? (t.checked ? "grande" : null) : (t.checked ? "1" : null)); aplicarPrefs(); renderCuenta(); if (estado && estado.config) renderRuta(); }
   });
-  function abrirGlosario() {
-   abrirHoja("Glosario y ayuda", '<dl class="glosario"><dt>Casita</dt><dd>Una de las 10 partes de su meta. Su tamaño sale de su plan y su parte del pie.</dd><dt>Verificado</dt><dd>Bci lo comprobó en su cuenta. Suma a sus premios.</dd>' +
-   "<dt>Declarado</dt><dd>Ahorro en otra institución que usted indicó. Cuenta para su casa, pero no activa premios.</dd><dt>Propuesta para su camino</dt><dd>Si cambia lo que pueden aportar, se reparten de nuevo solo las casitas que faltan. Las casitas logradas se mantienen.</dd>" +
-   "<dt>Juntos</dt><dd>La suma de los dos viajes. Ninguno aprueba los aportes del otro.</dd><dt>Renta que pide el banco</dt><dd>Al menos 4 veces el dividendo (Bci, Crédito hipotecario, 9-11-2026).</dd></dl>" +
-   '<p class="nota">La idea de dividir el pie en casitas es una hipótesis de diseño que estamos probando.</p>');
+  var hojasMod = null;
+  function conHojas(fn) {
+   if (hojasMod) { fn(hojasMod); return; }
+   var s = document.createElement("script"); s.src = "js/hojas.js";
+   s.onload = function () { hojasMod = window.CimientoHojas({ esc: esc }); fn(hojasMod); };
+   s.onerror = function () { toast("No pudimos abrir esta hoja. Intente de nuevo."); };
+   document.head.appendChild(s);
   }
-  function abrirAcerca() {
-   var base = location.href.split("?")[0];
-   abrirHoja("Acerca de este prototipo", '<p class="hoja-nota">Prototipo académico del Taller de Interacción IV (UDD) para Bci Labs. Sin valor legal. No es una oferta de Bci: el banco decide.</p><p class="nota">Versión ' + esc(window.CIMIENTO_VERSION || "0.21") + ' · 12-11-2026. Datos de demostración.</p>' +
-   '<h3 class="rotulo">Para la persona que facilita</h3><div class="pila"><button class="boton secundario" type="button" data-fac="finmes">Simular fin de mes</button>' + (/^demo/.test(api.codigo) ? '<button class="boton secundario" type="button" data-fac="reiniciar">Reiniciar demo</button>' : "") +
-   '<button class="boton secundario" type="button" data-fac="registro">Descargar registro de la prueba (JSON)</button><button class="boton secundario" type="button" data-fac="copiar-registro">Copiar registro</button><button class="boton secundario" type="button" data-fac="compartir-registro">Compartir registro</button></div>' +
-   '<p class="ayuda">El registro no guarda nombres, RUT, claves ni montos: solo el código de la prueba, la acción, la hora y la versión.</p>' +
-   '<p class="ayuda">Accesos directos: <code>' + esc(base) + "?codigo=demo-p1&amp;persona=p1&amp;tour=0</code> (Tomás; p2 = Paula). <code>?codigo=alta-p1</code> abre el alta limpia. <code>&amp;finmes=1</code> simula el fin de mes al entrar.</p>" +
-   '<p class="rotulo-pie">' + ROTULO + "</p>");
-  }
+  function abrirGlosario() { conHojas(function (H) { abrirHoja("Glosario y ayuda", H.glosario()); }); }
+  function abrirAcerca() { conHojas(function (H) { abrirHoja("Acerca de este prototipo", H.acerca(location.href.split("?")[0], esDemo(), ROTULO)); }); }
   on("c-glosario", "click", abrirGlosario);
   on("c-acerca", "click", abrirAcerca);
   var avisoInstalar = null;
@@ -1057,6 +1066,7 @@
    }
   });
   function simularFinMes() {
+   marcarPaso("finmes");
    var c = clonarCfg(), n = 0; c.propuestas = {};
    personas().forEach(function (p) { var pr = V.proponer(c.personas[p], estado.aportes, p); if (pr) { pr.id = "fm-" + Date.now() + p; c.propuestas[p] = pr; n++; } });
    return guardar(c, n ? "Fin de mes simulado: hay una propuesta para su camino." : "Fin de mes simulado: ambos van según lo previsto.").then(function () {
@@ -1064,12 +1074,13 @@
     var pr = propuestaActiva(); if (pr && !pref("prop-auto:" + pr.id)) { pref("prop-auto:" + pr.id, "1"); setTimeout(entrarAjuste, 350); }
    });
   }
+  var sembrando = false;
   function reiniciarDemo() {
-   var q = quien;
+   var q = quien; sembrando = true; celebrarPend = null;
    api.borrar().then(function () { return Store.sembrarDemo(api); }).then(function () { return esperarConfig(api); }).then(function (e) {
-    estado = e; Object.keys(localStorage).forEach(function (k) { if (/^cimiento:pref:(prop:|tip:|pp|tour)/.test(k)) localStorage.removeItem(k); });
+    estado = e; sembrando = false; Object.keys(localStorage).forEach(function (k) { if (/^cimiento:pref:(prop|tip:|pp|tour|premios18)/.test(k)) localStorage.removeItem(k); });
     try { sessionStorage.removeItem("cimiento:sesion:armada:" + api.codigo); } catch (er) {}
-    cerrarDialogo("hoja", true); modoRuta = "mio"; ultimaFalta = null; entrar(q, {}); toast("Demo reiniciado.");
+    cerrarDialogo("hoja", true); modoRuta = "mio"; ultimaFalta = null; entrar(q, { sinTour: true }); toast("Caso de ejemplo reiniciado.");
    });
   }
   function cerrarSesion() {
@@ -1118,37 +1129,33 @@
 
   /* === Primeros pasos (5) === */
   function clavePersona() { return (api ? api.codigo : "") + ":" + quien; }
-  var PP = [["casa", "Ver su casa", "ruta"], ["aporte", "Hacer su primer aporte", "aportar"], ["premios", "Mirar sus premios", "premios"], ["simular", "Probar «Simular un cambio»", "simular"], ["invitar", "Invitar a su pareja o familiar (opcional)", "juntos"]];
+  var PP = [["aporte", function () { var v = vj(); return v.actual >= 0 ? "Completar la casita " + (v.actual + 1) + " con un aporte" : "Hacer un aporte"; }, "completar"], ["finmes", function () { return "Simular el fin de mes y ver la propuesta"; }, "finmes"],
+   ["plan", function () { return "Cambiar el plan"; }, "aportes"], ["ficha", function () { return "Ver la ficha de una casita (rescatar o transferir)"; }, "premios"], ["datos", function () { return "Ver y revocar el uso de datos"; }, "datos"]];
   function ppDatos() { try { return JSON.parse(pref("pp:" + clavePersona()) || "{}"); } catch (e) { return {}; } }
-  function primerosPasos() { var d = ppDatos(); return { d: d, hechos: PP.slice(0, 4).filter(function (x) { return d[x[0]]; }).length, total: 4 }; }
-  function marcarPaso(k) {
-   if (!api || !quien) return;
-   var d = ppDatos(); if (d[k]) return; d[k] = 1; pref("pp:" + clavePersona(), JSON.stringify(d));
-   var p = primerosPasos();
-   if (p.hechos === 4 && !pref("pp-fin:" + clavePersona())) { pref("pp-fin:" + clavePersona(), "1"); setTimeout(function () { if (tourEstado() === "fin") { confeti(14); toast("Completó sus primeros pasos."); } }, 1200); }
-  }
+  function marcarPaso(k) { if (!api || !quien) return; var d = ppDatos(); if (d[k]) return; d[k] = 1; pref("pp:" + clavePersona(), JSON.stringify(d)); }
   function abrirPrimerosPasos() {
-   var p = primerosPasos(), C = 2 * Math.PI * 22, f = p.hechos / p.total;
-   abrirHoja("Primeros pasos", '<div class="pp-cab"><svg class="pp-anillo" width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><circle cx="28" cy="28" r="22" fill="none" stroke="#DCE5F1" stroke-width="7"/><circle cx="28" cy="28" r="22" fill="none" stroke="#28892B" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + (f * C).toFixed(1) + " " + C.toFixed(1) + '" transform="rotate(-90 28 28)"/></svg>' +
-   '<p class="hoja-nota" style="margin:0"><strong>' + p.hechos + " de " + p.total + "</strong> listos. Cada paso se marca solo al hacerlo.</p></div>" +
-   '<ul class="pp-lista">' + PP.map(function (x) { var ok = !!p.d[x[0]]; return '<li><button class="pp-item' + (ok ? " ok" : "") + '" type="button" data-pp="' + x[2] + '"><i aria-hidden="true">' + (ok ? '<svg class="ic"><use href="#i-check"/></svg>' : "") + "</i><span>" + x[1] + '</span><span class="solo-lector">' + (ok ? ", listo" : ", pendiente") + "</span></button></li>"; }).join("") + "</ul>" +
-   '<div class="pila"><button class="boton terciario" type="button" data-pp="ocultar">Ocultar esta lista</button></div>');
+   var d = ppDatos(), l = PP.filter(function (x) { return x[0] !== "finmes" || esDemo(); }).map(function (x) { return { ok: !!d[x[0]], txt: x[1](), dest: x[2] }; });
+   conHojas(function (H) { abrirHoja("Qué probar", H.probar(l, esDemo())); });
   }
   on("hoja-cuerpo", "click", function (e) {
    var b = e.target.closest("[data-pp]"); if (!b) return;
-   var q = b.getAttribute("data-pp"); cerrarDialogo("hoja", true);
-   if (q === "ocultar") { pref("pp-oculto:" + clavePersona(), "1"); renderRuta(); toast("Lista oculta. Está en Mi cuenta · Ayuda."); }
-   else if (q === "aportar") { irA("ruta"); abrirAportar(); }
-   else if (q === "simular") abrirSimular();
+   var q = b.getAttribute("data-pp"); cerrarDialogo("hoja", true); ev("probar_" + q);
+   if (q === "completar") { irA("ruta"); abrirAportar(montoCompletar() || per(quien).plan); }
+   else if (q === "finmes") { irA("ruta"); simularFinMes(); }
+   else if (q === "datos") { irA("cuenta"); $("c-datos").click(); }
+   else if (q === "volver") reiniciarDemo();
    else irA(q);
   });
-
+  function abrirQuePropone() { conHojas(function (H) { abrirHoja("¿Qué es Cimiento?", H.que()); }); ev("que_es"); }
+  on("btn-que", "click", abrirQuePropone); on("c-que", "click", abrirQuePropone);
+  on("c-volver", "click", function () { ev("volver_caso"); reiniciarDemo(); });
+  on("c-persona", "click", function () { var e2 = estado; mostrarEntrada(); $("form-login").hidden = true; $("form-codigo").hidden = true; elegirPersona(e2); });
   /* === Recorrido guiado de 6 pasos (5) === */
   var PASOS = [
    { sel: "r-sup", t: "Su próxima casita", x: function () { return "Casita = una meta pequeña de ahorro. Diez forman el pie de su vivienda."; } },
    { sel: "r-camino", t: "Su camino", x: function () { return "Lo logrado queda fijo. Lo que falta se adapta a usted."; } },
    { sel: "tab-juntos", t: "Casa", x: function () { return "La vivienda y quién construyó cada parte."; }, accion: "juntos" },
-   { sel: "tab-premios", t: "Beneficios", x: function () { return "Sus casitas valen dinero y cada etapa trae un premio (concepto simulado)."; }, accion: "premios" },
+   { sel: "tab-premios", t: "Beneficios", x: function () { return "Sus casitas valen dinero. Cimiento propone que Bci reconozca cada etapa."; }, accion: "premios" },
    { sel: "tab-aportes", t: "Plan", x: function () { return "Cambie su ahorro o agregue planes: el camino se adapta."; }, accion: "plan" }
   ];
   var tourI = -1, tourPausado = false;
@@ -1157,7 +1164,8 @@
   function iniciarTour(i) { tourI = i || 0; pref(claveTour(), String(tourI)); tourPausado = false; $("tour").hidden = false; pasoTour(tourI); ev("tour_inicio"); }
   function terminarTour(omitido) {
    $("tour").hidden = true; tourI = -1; pref(claveTour(), "fin"); ev(omitido ? "tour_omitir" : "tour_fin");
-   if (!omitido) setTimeout(function () { toast("Listo. Ya conoce su camino. Aporte cuando quiera."); }, 300);
+   if (esDemo()) setTimeout(function () { if (!hayDialogo()) abrirPrimerosPasos(); }, 500);
+   else if (!omitido) setTimeout(function () { toast("Listo. Ya conoce su camino. Aporte cuando quiera."); }, 300);
    renderRuta();
   }
   function pasoTour(i) {
@@ -1229,7 +1237,7 @@
   function onCambio(s) {
    var antes = estado; estado = s;
    if (s.config) guardarCache(s);
-   if (!(api && quien && s.config && !$("pantalla-app").hidden)) return;
+   if (sembrando || !(api && quien && s.config && !$("pantalla-app").hidden)) return;
    if (antes && antes.config && antes.config.personas) {
     var va = V.viaje(antes.config.personas[quien], antes.aportes, quien), vn = V.viaje(s.config.personas[quien], s.aportes, quien);
     var pn = V.premios(s.config, s.aportes, quien), vistos = (pref("premios18:" + clavePersona()) || "").split(",");
@@ -1282,6 +1290,7 @@
    irA("ruta", { sinScroll: true });
    if (!pref("premios18:" + clavePersona())) pref("premios18:" + clavePersona(), V.premios(cfg(), estado.aportes, quien).filter(function (x) { return x.estado === "logrado"; }).map(function (x) { return x.id; }).join(",") || "-");
    if (op.sinTour) pref(claveTour(), "fin");
+   if (op.conTour) pref(claveTour(), "0");
    render(); marcarPaso("casa");
    var remedir = function () { if (quien && estado && estado.config && vista === "ruta" && !hayDialogo()) renderRuta(); };
    if (document.fonts && document.fonts.ready) document.fonts.ready.then(remedir);
@@ -1340,7 +1349,7 @@
   on("btn-demo", "click", function () {
    var b = this; b.disabled = true;
    conectar("demo").then(function (a) { return (a.estado().config ? Promise.resolve() : Store.sembrarDemo(a)).then(function () { return esperarConfig(a); }); })
-    .then(function (e) { b.disabled = false; estado = e; ev("demo"); entrar("p1", {}); }).catch(function () { b.disabled = false; });
+    .then(function (e) { b.disabled = false; estado = e; ev("demo"); entrar("p1", { conTour: true }); }).catch(function () { b.disabled = false; });
   });
 
   /* ---------- Plan (ronda 21): js/plan.js se carga al abrir la pestaña ---------- */

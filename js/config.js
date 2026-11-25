@@ -6,7 +6,7 @@
  */
 window.CIMIENTO_FIREBASE = null;
 // Versión de la app (se muestra en «Acerca de este prototipo» y se guarda en cada evento del registro de pruebas).
-window.CIMIENTO_VERSION = "0.21";
+window.CIMIENTO_VERSION = "0.22";
 /* Ejemplo:
 window.CIMIENTO_FIREBASE = {
   apiKey: "...",

@@ -82,13 +82,18 @@
     ok("Casita de dos líneas: propia en curso al 32 % (ancho 35,5) y la otra sin avance (solo pista)", /cs-propia" x="8" y="66" width="35\.5"[^>]*#FFE300/.test(g2) && !/cs-otra/.test(g2) && /#1D5699/.test(g2), "ok");
     ok("Casita de dos líneas: ambas vacías = techo gris; avance mínimo de la otra = 20 de ancho", /stroke="#B7C6DA"/.test(g3) && !/cs-propia|cs-otra/.test(g3) && /cs-otra"[^>]*width="16(\.0)?"/.test(g4), "ok");
     ok("Casita de dos líneas: si solo la otra avanza, el techo es azul (Tomás en azul oscuro con borde)", /stroke="#1D5699" stroke-width="17"/.test(g5) && /cs-otra"[^>]*fill="#1D5699" stroke="#12365F"/.test(g5), "ok");
-    // Datos demo: Tomás 5,3 y Paula 3,2 (3 completas y 20 % de la cuarta); juntos 8,5
+    // Caso único (ronda 22): Tomás 6,7 (casita 7 al 70 %) y Paula 3,2 (3 completas y 20 % de la cuarta); juntos 9,9
     var dd = window.CimientoStore ? window.CimientoStore.datosDemo() : null;
     if (dd) {
       var vt = viaje(dd.cfg.personas.p1, dd.aportes, "p1"), vp = viaje(dd.cfg.personas.p2, dd.aportes, "p2"), dec = function (x) { return Math.floor(V.unidades(x) * 10 + 1e-6) / 10; };
-      ok("Demo: Tomás 5,3 casitas ($22.670.000; faltan $5.020.000 en la 6)", dec(vt) === 5.3 && vt.verificado === 22670000 && vt.faltaCasita === 5020000 && vt.actual === 5, dec(vt) + " · " + pesos(vt.verificado));
+      ok("Demo (caso único): Tomás 6,7 casitas ($33.682.000; casita 7 al 70 %, faltan $2.568.000)", dec(vt) === 6.7 && vt.verificado === 33682000 && vt.faltaCasita === 2568000 && vt.actual === 6, dec(vt) + " · " + pesos(vt.verificado));
+      var kd = V.constancia(dd.aportes, null, "p1"), apC = dd.aportes.concat([{ de: "p1", monto: 3000000, estado: "verificado", origen: "cuenta-bci", fecha: new Date().toISOString() }]), vC = viaje(dd.cfg.personas.p1, apC, "p1");
+      var prA = V.premios(dd.cfg, dd.aportes, "p1").filter(function (p) { return p.id === "mitad"; })[0], prC = V.premios(dd.cfg, apC, "p1").filter(function (p) { return p.id === "mitad"; })[0], kC = V.constancia(apC, null, "p1");
+      ok("Demo: «Completar la casita 7» ($3.000.000) la cierra, empieza la 8 bajo 50 %, desbloquea ½ y la racha pasa de 3 (Bronce) a 4",
+       kd.meses === 3 && kd.nivel === "Bronce" && prA.estado === "proximo" && vC.actual === 7 && vC.casitas[7].lleno > 0 && vC.casitas[7].lleno < 0.5 && prC.estado === "logrado" && kC.meses === 4,
+       "racha " + kd.meses + "→" + kC.meses + " · ½ " + prA.estado + "→" + prC.estado + " · casita 8 " + pct(vC.casitas[7].lleno));
       ok("Demo: Paula 3,2 casitas (3 completas y 20 % de la 4); conserva $400.000 declarados", dec(vp) === 3.2 && vp.acunadas === 3 && vp.actual === 3 && pct(vp.casitas[3].lleno).replace(/\s/g, " ") === "20 %" && vp.declarado === 400000, dec(vp) + " · " + pesos(vp.verificado) + " · faltan " + pesos(vp.faltaCasita));
-      ok("Demo: «Juntos» suma 8,5 casitas (una decimal)", Math.floor((dec(vt) + dec(vp)) * 10 + 1e-6) / 10 === 8.5, (dec(vt) + dec(vp)).toFixed(2));
+      ok("Demo: «Juntos» suma 9,9 casitas (una decimal)", Math.floor((dec(vt) + dec(vp)) * 10 + 1e-6) / 10 === 9.9, (dec(vt) + dec(vp)).toFixed(2));
     }
     // Protocolo de pruebas: importar sin duplicados, SUS y métricas del resumen CIF
     var PR = window.CimientoProtocolo;

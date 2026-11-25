@@ -180,11 +180,11 @@
 
   /* Premios (concepto): escalera con estado Logrado / Próximo / Bloqueado. Ronda 18: sobre la parte verificada de cada persona. */
   var PREMIOS = [
-   { id: "primera", titulo: "Primera casita", corto: "1.ª", txt: "Sello Bci y sin cobro de apertura de la cuenta." },
-   { id: "cuarto", titulo: "Un cuarto del pie", corto: "¼", f: 0.25, txt: "Bono por casita." },
-   { id: "mitad", titulo: "La mitad del pie", corto: "½", f: 0.5, txt: "Tasa hipotecaria preferente desbloqueada y ejecutivo dedicado." },
-   { id: "tres", titulo: "Tres cuartos del pie", corto: "¾", f: 0.75, txt: "Prioridad de atención por constancia y material nuevo en la casita." },
-   { id: "meta", titulo: "Meta", corto: "Meta", f: 1, txt: "Bono final y ficha con la trayectoria completa. Condiciones preferentes en tasación y gastos." }
+   { id: "primera", titulo: "Primera casita", corto: "1.ª", txt: "Idea para Bci: sello Bci en su casita y sin cobro de apertura de la cuenta." },
+   { id: "cuarto", titulo: "Un cuarto del pie", corto: "¼", f: 0.25, txt: "Idea para Bci: un beneficio menor por casita." },
+   { id: "mitad", titulo: "La mitad del pie", corto: "½", f: 0.5, txt: "Idea para Bci: condiciones hipotecarias preferentes a evaluar por el banco, y un ejecutivo dedicado." },
+   { id: "tres", titulo: "Tres cuartos del pie", corto: "¾", f: 0.75, txt: "Idea para Bci: prioridad de atención por constancia y material nuevo en la casita." },
+   { id: "meta", titulo: "Meta", corto: "Meta", f: 1, txt: "Idea para Bci: beneficio final y ficha con la trayectoria completa. Condiciones en tasación y gastos a evaluar por el banco." }
   ];
   function casitaDelHito(v, f) {
    var s = 0, obj = v.parte * f - 0.5;
@@ -219,7 +219,10 @@
     var aria = nombreMes + (actual ? ", este mes, " + (ok ? "con aporte verificado" : "sin aporte todavía") : futuro ? ", mes futuro" : ", con aporte verificado");
     ult.push({ k: m, ok: ok, actual: actual, futuro: futuro, et: et, aria: aria });
    }
-   return { meses: n, esteMes: !!meses[k], ultimos: ult };
+   var max = 0, run = 0, ks = Object.keys(meses).map(Number).sort(function (a, b) { return a - b; });
+   ks.forEach(function (m, j) { run = j && m === ks[j - 1] + 1 ? run + 1 : 1; if (run > max) max = run; });
+   var nivel = max >= 12 ? "Oro" : max >= 6 ? "Plata" : max >= 3 ? "Bronce" : null;
+   return { meses: n, esteMes: !!meses[k], ultimos: ult, max: max, nivel: nivel };
   }
   var MES_CORTO = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
   var MES_LARGO = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -491,7 +494,6 @@
    var H = ys[0] + 132, xs = cas.map(function (x, k) { return ((k - ref) % 2 === 0) ? xL : xR; });
    var s = '<svg class="camino-svg" viewBox="0 0 ' + W + " " + H + '" width="' + W + '" height="' + H + '" role="group" aria-label="Su camino de casitas: la meta arriba y el inicio abajo">';
    var tramos = "";
-   // Ronda 21: lo logrado es un trazo grueso y cálido; lo que falta, fino y suave, se aleja hacia la meta; un plan futuro alarga su tramo en azul.
    function tramo(x1, y1, x2, y2, ok, aj, lejos, azul) {
     var dd = "M" + x1 + " " + y1 + " C" + x1 + " " + (y1 + y2) / 2 + " " + x2 + " " + (y1 + y2) / 2 + " " + x2 + " " + y2;
     return ok ? '<path d="' + dd + '" fill="none" stroke="#CFE8CF" stroke-width="22" stroke-linecap="round"/><path class="tr-ok" d="' + dd + '" fill="none" stroke="' + COL.verde + '" stroke-width="12" stroke-linecap="round"/>'
@@ -578,7 +580,6 @@
     nodos += g + "</g>";
    });
    s += med + nodos;
-   // Marcas tocables: el punto donde se ajustó el camino y los planes futuros (azul sereno).
    function marcaBtn(x0, y0, attr, lab, dentro) { return '<g class="cm-marca" role="button" tabindex="0" ' + attr + ' aria-label="' + e(lab) + '"><circle cx="' + x0 + '" cy="' + y0 + '" r="22" fill="transparent"/><circle cx="' + x0 + '" cy="' + y0 + '" r="13" fill="#FFFFFF" stroke="' + COL.azul + '" stroke-width="2.5"/><g transform="translate(' + x0 + " " + y0 + ')" fill="none" stroke="' + COL.azul + '" stroke-width="2" stroke-linecap="round">' + dentro + "</g></g>"; }
    if (op.marca && act >= 0) s += marcaBtn(xs[act] + 72, ys[act] + 48, 'data-marca="1"', op.marca.txt + ": ver antes y después", '<path d="M-5 2a5 5 0 1 0 1.5-5.5"/><path d="M-5-6v3.5h3.5"/>');
    Object.keys(pz).forEach(function (q) { var j = +q; pz[q].forEach(function (p, t) { var y0 = j > 0 ? (ys[j - 1] + ys[j]) / 2 : (ys[0] + yIni) / 2, x0 = (j > 0 ? (xs[j - 1] + xs[j]) / 2 : xs[0]) + 40 + t * 30;

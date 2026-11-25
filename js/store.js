@@ -103,7 +103,8 @@
       }
       return abrirLocal(codigo, onCambio).then(function (api) { api.codigo = codigo; return api; });
     },
-    /* Caso de ejemplo: Tomás y Paula, cada uno con su viaje. Tomás: $22,67 M verificados (5,3 casitas; casita 6 al 32 %).
+    /* Caso de ejemplo (único desde la ronda 22): Tomás y Paula, cada uno con su viaje. Tomás: casitas 1 a 6 logradas y la 7 al 70 %
+       (3 meses seguidos con aporte verificado = Bronce; sin aporte este mes). Antes (ronda 19): $22,67 M, casita 6 al 32 %.
        Ronda 19: Paula queda con 3,2 casitas verificadas (3 completas y 20 % de la cuarta) para que la casita de dos líneas
        muestre la diferencia; conserva su aporte de este mes ($700.000) y su declarado de $400.000 (otra institución).
        datosDemo() es puro (lo usan las pruebas); sembrarDemo() lo guarda. */
@@ -114,7 +115,10 @@
         p1: { nombre: "Tomás", ingreso: 1700000, gastos: 1100000, capacidad: 600000, ahorro: 0 },
         p2: { nombre: "Paula", ingreso: 1300000, gastos: 900000, capacidad: 400000, ahorro: 0 }
       });
-      var t1 = V.r10k(40000000 * cfg.personas.p1.parte / cfg.pie), c2 = cfg.personas.p2.casitas;
+      // Ronda 22: caso único. Tomás deja al 70 % la casita donde cae el hito de la mitad (hoy la 7), con 1 a 6 logradas:
+      // un solo aporte «Completar la casita 7» la cierra, empieza la 8 y cruza la mitad del pie (½ pasa a desbloqueado).
+      var c1 = cfg.personas.p1.casitas, kM = V.premios(cfg, [], "p1").filter(function (p) { return p.id === "mitad"; })[0].casita, t1 = Math.round(c1[kM].monto * 0.7), c2 = cfg.personas.p2.casitas;
+      for (var q = 0; q < kM; q++) t1 += c1[q].monto;
       var t2 = c2[0].monto + c2[1].monto + c2[2].monto + Math.round(c2[3].monto * 0.2);
       var pasos = [
         // Tomás: saldo inicial + 3 meses con $600.000; este mes, aún nada (aportó menos de lo previsto).
